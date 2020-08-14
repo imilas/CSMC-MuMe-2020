@@ -22,6 +22,14 @@
 \usepackage{graphicx}
 \usepackage{url}
 \usepackage{apacite}
+%added 
+\usepackage[inline]{enumitem}    
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{threeparttable} %annotations for table
+\usepackage{csquotes}
+
+
 \newcommand{\keywords}[1]{\par\addvspace\baselineskip
 \noindent\keywordname\enspace\ignorespaces#1}
 
@@ -32,7 +40,7 @@
 \mainmatter  % start of an individual contribution
 
 % first the title is needed
-\title{\LaTeX{} Template for \textit{CSMC-MuMe 2020}}
+\title{Percussive Sound Generation with Virtual Listeners and Modular Synthesizers}
 
 % a short form should be given in case it is too long for the running head
 \titlerunning{Running Title}
@@ -43,14 +51,14 @@
 % their surnames. This ensures that the names appear correctly in
 % the running heads and the author index.
 %
-\author{AuthorA\inst{1}\and AuthorB\inst{2} \thanks{Please place acknowledgement here.}}
+\author{Amir Salimi \and Abram Hindle}
 %
 % if the names of the authors are too long for the running head, please use the format: AuthorA et al.
-\authorrunning{AuthorA and AuthorB (or AuthorA et al. if too long)}
+\authorrunning{Amir Salimi and Abram Hindle }
 
 % the affiliations are given next; don't give your e-mail address
 % unless you accept that it will be published
-\institute{InstituteA \and InstituteB\\ \email{author@phdsrus.ac.uk}}
+\institute{Department of Computing Science\\ University of Alberta \\ \email{asalimi@ualberta.ca}}
 
 %
 % NB: a more complex sample for affiliations and the mapping to the
@@ -62,10 +70,8 @@
 \maketitle
 
 \begin{abstract}
-The abstract should summarize the contents of the paper and should
-contain at least 70 and at most 150 words. It should be written using the
-\textit{abstract} environment.
-\keywords{Please list your keywords in this section}
+Digital sound artists often require a variety of percussive samples for their music. For more than two decades research involving digital synthesis, heuristic search, and neural networks has been used for the generation of novel sounds. Our goal is to generate one-shot percussive samples by leveraging modern AI technologies alongside scalable signal generation methods. We centered our approach around the combination of two central components: \begin {enumerate*} [label=(\roman*)] \item a \emph{virtual ear} capable of evaluating the proximity of unheard sounds to  and \item a dynamic \emph{virtual synthesizer} with a rich set of tractable parameters\end{enumerate*}. We present a generative pipeline that utilizes robust digital signal processing methods guided by supervised learning towards the generation of one-shot percussive sounds. We present our findings and measurements of the various approaches taken. Advantages, shortcomings and practicality of the employed methodologies are demonstrated. We share our curated dataset of sounds and codebase\footnote{\url{https://github.com/imilas/Synths_Stacks_Search}} which can be used for its further expansion.
+\keywords{Automatic Synthesizer design. Machine Listening. Sound Analysis. Novelty and Originality}
 \end{abstract}
 
 \section{Introduction}

@@ -84,13 +84,52 @@ By relying on recordings of \textit{real life} drum sounds, we are limited by wh
 \label{fig:pipeline_outline}
 \end{figure}
 
+
+
+\subsection{Related Works}
+\label{related_works}
+\begin{center}
+\begin{table}[h]
+\resizebox{\linewidth}{!}{\begin{tabular}{|c c c c|} 
+\hline
+Work & Feature extraction & Synthesis & Specilization & \hline
+Oord 2017 & CNN & CNN &Speech& \hline
+Yee-King 2018 & LSTM on Paremters & DSP & Synth Pads & \hline
+Aouameur 2019 & Latent layer& Decoding of Latent Layers & Percussion & \hline
+Ramires 2020 & Latent layer & FeedForward Network & Percussion & \hline
+Yamamoto 2020 & GAN & GAN & Speech & \hline
+\end{tabular}}
+\caption{Quick reference of recent related works}
+\end{table}
+\label{table:recent_works}
+\end{center}
+Numerous deep, neural network models have been proposed and utilized for the purpose of signal generation in recent years. WaveGans and WaveNet have been subject to significant improvements and experiments since their proposal~\cite{nsynth2017,yamamoto2020parallel,oord2017parallel}. Most relevant to us are recent works by Aoumaeur et al. in which variational AutoEncoders (VAE's) have been utilized for generation of percussive samples~\cite{aouameur2019neural}; As well as Ramires et al's work in generation of percussive sounds by guiding the output of a feedforward neural network via a small set of latent features~\cite{ramires2020neural}. 
+Automatic programming of virtual synthesizers has long been a topic of interest. In early 2000s, Interactive Genetic Algorithms (IGA's) were utilized for the generation of new sounds with various sound-engines~\cite{johnson1999exploring,dahlstedt2001creating}. More recent work by Yee-King et al.~\cite{yee2018automatic} used Long short-Term Memory (LSTM) models and genetic algorithms to find the exact parameters used to create a group of sounds. The sounds approximated were made by the same virtual synthesizer, not an external source; making the eventual replication certain even with random search. Since this work appears more focused on pads and textures rather than drums, feature matching appears to not be concerned with the envelope of the sounds but rather the frequency content within arbitrary time windows. Yet another recent work by Esling et al. used a large dataset of over 10,000 presets for a commercial VST synthesizer to learn a latent parameter space which can be sampled for creation of new audio~\cite{esling2019universal}. As stated before, our work explores the rapid approximation of percussion sounds with no previous knowledge about the sonic capabilities of our virtual synthesizer, exploring the actual parameter space rather than its latent representation.
+
 \subsection{Our Approach}
 To virtually create novel drum sounds, we need a tractable, generative source of audio; One that deterministically produces audio based on a set of instructions. Additionally, we need a method of evaluation to help us determine which sounds resemble drums and are worth keeping. To enable heuristic search, we would like to know what instructions caused our audio source to make the sounds we liked. Given these two components capable of \textit{generation} and \textit{evaluation} of sounds, we build a generative pipeline of audio as depicted in figure~\ref{fig:pipeline_outline}. The success of this pipeline is dependent on the characteristics of the components responsible for the generation and evaluation of the sounds. We call these two components the \emph{virtual synthesizer} and \emph{virtual ear} respectively.  
-
+\begin{figure}[t!]
+    \begin{center}
+    \textbf{Data Overview}
+    \makebox[\textwidth]{
+    \includegraphics[width=1.1\linewidth]{images/venn_data.pdf}}
+    \end{center}
+    \caption{ 
+    Scales are symbolic (True scales are not measurable and/or subjective). Our positive samples, $\mathcal{T^{+}}$, is a small fraction of a wide variety of percussive sounds that are conceivable. The size of $\mathcal{T^{-}}$ can be set to any number(we can generate any number of random samples), but we prefer to keep it no larger than  $\mathcal{T^{+}}$. $\mathcal{H}$ is a series of sounds sent to the ear for classification. The ideal ear will detect  $\mathcal{H^{+}}$, the overlap of $\mathcal{H}$ and $\mathcal{N}$, with high precision and recall. 
+    }
+\label{fig:ven_data}
+\end{figure}
 
 
 \subsection{Virtual Synthesizer Design}
 Sound is product of physical disturbances, causing vibrations in our mediums. Vibrations are perpetuated through air as part of an expanding, spherical front ~\cite{cook1999chap4}. A sound wave can be viewed as the result of a function which governs amplitude through time, where time and amplitude exist in continuous dimensions. Waves can be approximated via a series of samples, associating time steps to a discrete range of amplitude values.~\textit{Digital synthesis} of audio is the process of creating these discrete values.
+Unlike the majority of the works mentioned in Section~\ref{related_works}, we do not employ probabilistic models for the synthesizer component. Our decision is based on the following factors:
+\begin{itemize}
+    \item \textit{Interpretability and Expansion}:
+    \item \textit{Novelty and Creativity}: Given large sets of examples, generative models such as VAEs and GANS have proven capable of generating samples similar to the exemplars. we are not aiming for perfect imitations, rather, we want to work with the limitations of any tractable sound source to create its novel approximations of a given sound category.     
+    \item \textit{Efficiency}: 
+
+\end{itemize}
 
 \begin{figure*}[htbp]
 \label{fig_example_sine}
@@ -103,25 +142,6 @@ Evaluation of a periodic function such as sine or cosine is the simplest form of
  
 \subsection{How Can a Computer Evaluate Sounds?}
 Automatic evaluation of sounds is an essential component of our work: A thorough manual evaluation of outputs is not possible when hundreds can be created in a second. In our work, we find simple features such as frequency content (high pitch vs low pitch), length, and envelope (change in loudness, how fast the sounds reaches its maximum loudness and fades away) to be powerful for the categorization of drum sounds. Later on we will discuss our algorithms for extraction of these and other features in~\ref{implementation}. We will also discuss how these extracted features were used to train models that can automatically categorize new sounds.  
-
-\subsection{Neural Networks and Sound}
-
-\begin{center}
-\begin{table}[h*]
-\hline
- \resizebox{\linewidth}{!}{\begin{tabular}{||c c c c||} 
-work & feature extraction & synthesis & specilization & \hline
-Oord et al & CNN & CNN &Speech& \hline
-Yamamoto et al & GAN & GAN&Speech & \hline
-Aouameur et al & Latent layer& Decoding of Latent Layers & Percussion & \hline
-Ramires et al & Latent layer & FeedForward Network & Percussion & \hline
-Yee-King et al & LSTM on Paremters & DSP & Synth Pads & \hline
-\end{tabular}}
-\caption{Quick reference for related works}
-\end{table}
-\end{center}
-
-
 
 \section{Implementation}
 We conceptualized a general pipeline for approximation of sounds: A synthesizer creates random noise while a virtual ear rapidly evaluates the outputs and outputs a score which is used for the separation of undesired outputs from desired ones. This approach assumes that a fraction of the randomly generated sounds can be substituted for percussion and that the synthetic ear will assign higher evaluation scores to this subset. 

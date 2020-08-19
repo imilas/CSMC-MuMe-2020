@@ -176,9 +176,9 @@ We are not looking for the perfect imitation of organic drums using a synthesize
     }
 \label{fig:ven_data}
 \end{figure}
-\hypref{Decision.1} requires knowledge of what drums \textbf{do not} sound like, or knowledge of an infinitely large set, which cannot be fully represented via examples. An important consideration is that the source of sounds used in training the model (organic drum sounds) will be fundamentally different from the source of unlabeled sounds we wish to categorize (noise from a synthesizer). This issue is reflective of the OSR problem~\cite{geng2020recent,mundt2019open}. Figure~\ref{fig:ven_data} highlights a number of caveats with this approach. we denote $\mathcal{N}$ as the set of percussive sounds a synthesizer is capable of making. $\mathcal{T^{+}}$, our positive examples, is a set of sound extracted from material drums. $\mathcal{T^{-}}$, is a small subset of an infinite set which is meant to represent all noises which the synthesizer is capable of making. It likely includes sounds in $\mathcal{N}$. could be used as drums. During the hearing test, the virtual ear continually receives synthesizer noises ($\mathcal{H}$) for classification. The performance of the ear is measured by its precision and recall in finding the overlap between $\mathcal{H}$ and $\mathcal{N}$. It is important to ensure that the change in learning domains---particularly with the case of positive examples of percussive instruments---does not interfere with transformation of knowledge from the training of the ear to the hearing test. To maximize the transference of knowledge from one domain to another, we seek to learn from agnostic feature sets that capture fundamental characteristics of the data points.
+\hypref{Decision.1} requires knowledge of what drums \textbf{do not} sound like, or knowledge of an infinitely large set, which cannot be fully represented via examples. An important consideration is that the source of sounds used in training the model (organic drum sounds) will be fundamentally different from the source of unlabeled sounds we wish to categorize (noise from a synthesizer). This issue is reflective of the OSR problem~\cite{geng2020recent,mundt2019open}. Figure~\ref{fig:ven_data} highlights a number of caveats with this approach. we denote $\mathcal{N}$ as the set of percussive sounds a synthesizer is capable of making. $\mathcal{T^{+}}$, our positive examples, is a set of sound extracted from material drums. $\mathcal{T^{-}}$, is a small subset of an infinite set which is meant to represent all noises which the synthesizer is capable of making and likely includes sounds in $\mathcal{N}$. During the hearing test, the virtual ear continually receives synthesizer noises for classification. The set of received noises is denoted as $\mathcal{H}$. The performance of the ear is measured by its precision and recall in finding the overlap between $\mathcal{H}$ and $\mathcal{N}$. It is important to ensure that the change in learning domains ---particularly with the case of positive examples of percussive sounds--- does not interfere with transformation of knowledge from the training of the ear to the hearing test. To maximize the transference of knowledge from one domain to another, we seek to learn from agnostic feature sets that capture fundamental characteristics of the data points.
 \subsection{Feature Extraction}
-To train our virtual ear, we require generalizable, domain agnostic features. Various works have demonstrated effective reconstruction of signals given their Short-time Fourier Transforms (STFT) ~\cite{nawab1983signal,griffin1984signal}. If the STFT of a signal can be used its reconstruction, perhaps it can be utilized as a source of fundamental features necessary for audible signal categorization. We defined 3 STFT transformation functions which we believe to capture important, unique attributes of percussive sounds (figure ~\ref{fig:stackspectrums}). Our transformations are GPU based, allowing their application in tandem to the training of the classifier or tuning of STFT transformation during hyper-paramter optimization (see Section~\ref{---}).
+To train our virtual ear, we require generalizable, domain agnostic features. Various works have demonstrated effective reconstruction of signals given their Short-time Fourier Transforms (STFT) ~\cite{nawab1983signal,griffin1984signal}. If the STFT of a signal can be used its reconstruction, perhaps it can be utilized as a source of fundamental features necessary for audible signal categorization. We defined 3 STFT transformation functions which we believe to capture important, unique attributes of percussive sounds (figure ~\ref{fig:stackspectrums}). Our transformations are GPU based, allowing their application in tandem to the training of the classifier or tuning of STFT transformation during hyper-paramter optimization (see Appendix~\ref{appendix:F}).
 
 \subsection{Ear Types}
 \label{classifiers}
@@ -329,11 +329,19 @@ Using the described features, we trained several neural network models for Phase
 Unlike EE models, parameters are hand-picked and un-tuned. Higher accuracy rates in these models do not necessarily translate to higher agreeableness with surveyors. Since the positive sounds in the hearing test are sourced from a synthesizer, model accuracy on test data alone cannot be relied upon when the domain of sounds 
 being categorized is switched.
 
+%========
+
+%==============
 \chapter{AutoEncoder Structures and Hyper-Parameter Optimization}
-\label{appendix:D}
-\section{Possible Model Structures}
-\begin{table}[[h]
-\begin{tabular}{|p{28mm}|p{25mm}|p{23mm}|p{50mm}|}
+% could do multi-objective pareto front stuff too
+Within the context of machine learning, a model's \emph{hyper-parameters} are fixed parameters which are set before the training begins (e.g number of layers, size of layers, loss function) and are not learned during the minimization procedure~\cite{bengio2000gradient}. To assist us with the construction of our model, we defined a number of possible choices for the architecture of our model and audio-transformers and used hyper-parameter optimization to extract promising sets of values~\ref{table:hyper_params}. 
+
+The list of possible choices for the selected hyper-parameters can be found in table~\ref{table:hyper_params}. We included not only model parameters but also spectrogram transformation parameters within this search space, as GPU accelerated FFT calculations allows ad hoc audio transformations to take place parallel to the training process. We implemented 3 base models which are affected by these hyper-parameters. The \enquote{Model Type} parameter dictates whether CNN or fully connected models are selected; If a \enquote{fully connected} model is selected, the \enquote{hidden layers} parameter selects between the two implementations. The specifications for these models can be found in tables~\ref{table:FC1_AUTOENCODER},~\ref{table:FC2_AUTOENCODER} and~\ref{table:CNNAUTOENCODER}.
+
+Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 search trials. The trial's success is measured in their final loss value, calculated by applying the model to test data-set. Each trials consisted of 20 epoch of training using a selected set of hyper-parameters. An additional 100 trials with 40 epochs of training were conducted following the initial 500 to test the effect of longer epochs. Each trial's intermediate results (loss at every n epoch,s where $0<n<20$) were reported to a multi-armed bandit based pruner for early stoppage of unpromising trials~\cite{li2017hyperband}. We employed a tree-structured parzen estimator for better navigation of the search space~\cite{bergstra2011algorithms,akiba2019optuna} but found short reversions to a random sampling coupled with a decrease in the frequency of pruning helpful in exiting local minima. \\
+
+\begin{table}
+\begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|p{3cm}|}
 \hline
 Layer-\# & Out Shape & Param Num & Details  \\ \hline
 Conv2d-1 & [-1, 8, 30, 20] &   208 & Encoder's input \newline
@@ -354,8 +362,8 @@ Linear-8 & [-1, 600 ] &  154,200& Decoder's output\\ \hline
 \label{table:CNNAUTOENCODER}
 \end{table}
 
-\begin{table}[[h]
-\begin{tabular}{|p{28mm}|p{25mm}|p{23mm}|p{50mm}|}
+\begin{table}
+\begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|p{3cm}|}
 \hline
 Layer-\# & Out Shape & Param Num & Details  \\ \hline
 Linear-1 & [-1, 128]  & 76,928 & Encoder's input \\ \hline
@@ -369,9 +377,9 @@ Linear-6  & [-1, 600 ] &  77,400 &Decoder's output\\ \hline
 \label{table:FC1_AUTOENCODER}
 \end{table}
 
-\begin{table}[[h]
+\begin{table}
 
-\begin{tabular}{|p{28mm}|p{25mm}|p{23mm}|p{50mm}|}
+\begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|p{3cm}|}
 \hline
 Layer-\# & Out Shape & Param Num & Details  \\ \hline
 Linear-1 & [-1, 128]  & 76,928 & Encoder's input \\ \hline
@@ -388,6 +396,34 @@ Linear-6  & [-1, 600 ] &  77,400 &Decoder's output\\ \hline
 \caption{Fully connected model with 2 hidden dimensions for encoder and decoder. Designed assumes latent size of 8. 30 and 20 are the assumed frequency-bins and step-size values. Total number of parameters is 163,232.}
 \label{table:FC2_AUTOENCODER}
 \end{table}
+
+\begin{figure}[htbp]
+\centering
+\textbf{Tracing the Best Loss Values}
+\includegraphics[width=12cm,height=7cm]{images/Optimization_History.pdf}
+\caption{Best loss values found during hyper-parameter optimization. The effect of a switch to random sampling and an increase of the pruning threshold can be observed during trials 270 and 310.}
+\label{chap3:bestvalues}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\textbf{Loss Value per Epoch for Top 10 Trials}
+\includegraphics[width=12cm,height=6.5cm]{images/loss_per_training.pdf}
+\caption{Loss value per epoch for top 10 trials. Some of the initial 500 trials appear in this list, despite having half the number of epoch steps. The learning curves tend to flatten quickly. Therefore, 20 epoch steps may be a reasonable number for measuring hyper-parameter viability. }
+\label{chap3:top10}
+\end{figure}
+
+
+\begin{figure}
+\begin{center}
+    \textbf{Hyper-Parameters' Loss Correlation}
+    \makebox[\textwidth]{\includegraphics[width=0.95\paperwidth]{images/slice_plot.pdf}}
+      \caption{Sliced plot depicting the correlation between hyper-parameters and loss values. The color-scale shows the number of times each parameters has been used in a trial. Our sampling algorithm aims to utilize spaces with higher potential more often. }
+    \label{fig:slicegraph}
+    \end{center}
+
+\end{figure}
+
 \begin{table}[htbp!]
 \centering
 \begin{tabular}{|p{6cm}|p{6cm}|}
@@ -406,6 +442,9 @@ Dropout Rate & 0.5 \\ \hline
 \caption{Top performing hyper-parameter set}
 \label{table:best_params}
 \end{table}
+
+
+%==============
 \chapter{Embedded Feature Visualization}
 \label{appendix:E}
 \begin{figure}[]
@@ -428,6 +467,7 @@ Dropout Rate & 0.5 \\ \hline
 \caption{3D projections of the data used for Figure~\ref{fig:2d_tsne}. Interactive demos are also implemented for 3D projections.}
 \label{fig:3d_tsne}
 \end{figure}
+
 
 
 \end{appendices}

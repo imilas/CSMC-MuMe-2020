@@ -60,7 +60,7 @@
 \maketitle
 
 \begin{abstract}
-Digital sound artists often require a variety of percussive samples for their music. For more than two decades research involving digital synthesis, heuristic search, and neural networks has been used for the generation of novel sounds. This work is a proof of concept in automatic programming of synthesizers towards their best approximation of drum sounds. We centered our approach around the combination of two central components: \begin {enumerate*} [label=(\roman*)] \item a \emph{virtual ear} capable of evaluating the proximity of unheard sounds to  and \item a dynamic \emph{virtual synthesizer} with a rich set of tractable parameters\end{enumerate*}. We present a generative pipeline that utilizes classical digital signal processing functions guided by supervised learning towards the generation of one-shot percussive sounds. We present our findings and measurements of a number of approaches taken. Advantages, shortcomings and practicality of the employed methodologies are demonstrated. We share our curated dataset of sounds and codebase\footnote{\url{https://github.com/imilas/Synths_Stacks_Search}} which can be used for its further expansion.
+Digital sound artists often require a variety of percussive samples for their music. For more than two decades research involving digital synthesis, heuristic search, and neural networks has been used for the generation of novel sounds. This work is a proof of concept in automatic programming of synthesizers towards their best approximation of drum sounds. We centered our approach around the combination of two central components: \begin {enumerate*} [label=(\roman*)] \item a \emph{virtual ear} capable of evaluating the proximity of \enquote{unusual} sounds to drum sounds and \item a dynamic \emph{virtual synthesizer} with a rich set of tractable parameters\end{enumerate*}. We present a generative pipeline that utilizes classical digital signal processing functions guided by supervised learning towards the generation of one-shot percussive sounds. We present our findings and measurements of a number of approaches taken. Advantages, shortcomings and practicality of the employed methodologies are demonstrated. We share our curated dataset of sounds and codebase\footnote{\url{https://github.com/imilas/Synths_Stacks_Search}} which can be used for its further expansion.
 \keywords{Automatic Synthesizer design. Machine Listening. Sound Analysis. Novelty and Originality}
 \end{abstract}
 
@@ -150,7 +150,7 @@ Unlike the majority of the works mentioned in Section~\ref{related_works}, we do
 \caption{A computer can simulate waveforms by utilizing periodic functions. Digital waveforms are discrete approximations of analogue waves~\cite{mitchell2009basicsynthChap5} }
 \end{figure*}
 
-Evaluation of a periodic function such as sine or cosine is the simplest form of software audio generation~\cite{mitchell2009basicsynthChap5}. This generative system is called an \textit{oscillator}. The combination and modification of oscillators are the building blocks of digital signal processing (DSP). Most sounds from the natural environment, and its flora and fauna are more complex than the output of a single oscillator. However, with careful programming, DSP techniques can be used to replicate almost any sound, which is why they have powered commercial digital synthesizers for over half a century ~\cite{jenkins2019analog}. Another advantage to using DSP for sound generation is that the synthesizers we build using these functions are tractable: the output is determined by the input and reproducible. This makes the evaluation of a set of inputs (or parameters) to our synthesizers  simpler compared to the evaluation of synthesizers that utilize probabilistic models.
+Evaluation of a periodic function such as sine or cosine is the simplest form of software audio generation~\cite{mitchell2009basicsynthChap5}. This generative system is called an \textit{oscillator}. The combination and modification of oscillators are the building blocks of digital signal processing (DSP). Most sounds from the natural environment, and its flora and fauna are more complex than the output of a single oscillator. However, with careful programming, DSP techniques can be used to replicate almost any sound, which is why they have powered coMEMrcial digital synthesizers for over half a century ~\cite{jenkins2019analog}. Another advantage to using DSP for sound generation is that the synthesizers we build using these functions are tractable: the output is determined by the input and reproducible. This makes the evaluation of a set of inputs (or parameters) to our synthesizers  simpler compared to the evaluation of synthesizers that utilize probabilistic models.
  
 We opted for a set of classical DSP methods to build our synthesizer. For our project, we used the python based Pippi library for sound generation\footnote{https://github.com/luvsound/pippi}. This library uses a C back-end\footnote{https://github.com/PaulBatchelor/Soundpipe} and focuses on fast offline generation of audio signals. Our virtual synthesizer contains a set of one or more submodules. Each submodule is a self-contained noise making unit. Submodules have identical sets of parameters, but widely different outputs can be achieved depending on the values assigned. The set of parameters available to each submodule is highlighted in Table~\ref{table:submodule_params}. The sonic output of the virtual synthesizer is the normalized addition of the sonic output of its submodules. Our implementation of a synthesizer can have any number of submodules. The parameters that dictate the output signal of each submodule as well as the range of values each parameter can take are shown in table~\ref{table:submodule_params}. We call the number of submodules in each virtual synthesizer the \textit{stack size}. We call the sets of parameter values that characterize a synthesizer's submodules a \textit{program} (analogous to a preset for a VST).  
 
@@ -180,11 +180,69 @@ We are not looking for the perfect imitation of organic drums using a synthesize
 \subsection{Feature Extraction}
 To train our virtual ear, we require generalizable, domain agnostic features. Various works have demonstrated effective reconstruction of signals given their Short-time Fourier Transforms (STFT) ~\cite{nawab1983signal,griffin1984signal}. If the STFT of a signal can be used its reconstruction, perhaps it can be utilized as a source of fundamental features necessary for audible signal categorization. We defined 3 STFT transformation functions which we believe to capture important, unique attributes of percussive sounds (figure ~\ref{fig:stackspectrums}). Our transformations are GPU based, allowing their application in tandem to the training of the classifier or tuning of STFT transformation during hyper-paramter optimization (see Section~\ref{---}).
 
-\subsection{Classifiers}
+\subsection{Ear Types}
 \label{classifiers}
-Two groups of classifiers are implemented: \emph{two phased ears} (TPEs) and \emph{embedding ears} (EEs). TPEs are a combination different models specializing in ~\hypref{Decision.2} or ~\hypref{Decision.1} and trained only with our transformation functions. EEs are trained on a highly compressed, automatically encoded representation of sounds and can give simultaneous answers to both questions. These encodings are extracted from the latent layer of a percussion autoencoder. 
+Two groups of classifiers are implemented: \emph{two phased ears} (TPEs) and \emph{Mixed Ear Models} (MEMs). TPEs combine different models specializing in ~\hypref{Decision.2} or ~\hypref{Decision.1} and trained only with our transformation functions. MEMs are a proof of concept attempt at addressing the OSR problem by usage of autoencoded representation of sounds as features. MEMs are trained using highly compressed, automatically encoded representation of sounds and can give simultaneous answers to both questions. Model specifications for TPE and MEMs can be found in Appendix~\ref{appendix:C}. We speculate that the features used to represent sounds plays a much more important role in determining outcomes, particularly when working with relatively small datasets. 
 
+The features used by MEMs are encodings extracted from the latent layer of an autoencoder trained with MixedDB. To better understand the delineation potential of the encoded features, 64-dimensional latent representation of 20\% of MixedDB and 1000 Noise sounds were projected onto a 2 or 3-dimensional planes using t-SNE. Referring to~\hypref{Decision.1} and~\hypref{Decision.2}, we expect the drum sounds to be clustered together, with the majority of the synthetic noise sounds appearing away from these clusters. The projections confirmed that this is the case(see Appendix~\ref{appendix:E}). We are most interested in synthetic noise sounds which appear within or near these clusters. Do these synthetic noise sounds have drum like characteristics?\\ 
+To test this, we implemented interactive projection graphs. These graphs allow interactions such as playing the samples(by hovering the cursor on-top) and movement of the scene camera. Manual inspections revealed a noticeable, positive correlation between distance and similarity of a synthetic sound to drum clusters.
 
+\section{Pipelines and Surveys}
+\label{gens}
+\label{surveys}
+With our virtual synthesizer and virtual ears in place, we build two pipelines, one using all TPE models and the other using our best MEM model. To assess the performance of each pipeline, we randomly create drum programs and generate and the corresponding signal. This signal is then fed through the ear model to determine if the signal is percussive. If so, a category is assigned to the sound. This sound and the corresponding synthesizer program are saved to hard-disk. Here we assess the success rate of two different pipelines by manual inspection of sounds it has categorized as drums, as well as the category of those drums. The authors of this work attempt their own categorization of a randomly selected subset of each pipeline's results. We cross reference the manual categorizations with the categories assigned by the virtual ear: Do we agree that the sounds are percussive? Do we agree with the drum group assigned to the percussive sounds?
+ 
+ \section{Survey of Two-Phased Ear Performance}
+   
+\begin{table}[htbp]
+ \resizebox{\linewidth}{!}{\begin{tabular}{||c c c c c c c||} 
+ \hline
+ Drop Rule & Size & HvH & H+FC & H+CNN & H+ALL & 3 models \\ [0.5ex] 
+ \hline
+ No Drops & 257 &0.37 & 0.35 & 0.36 & 0.36 & 0.28\\ 
+ \hline
+ Assigned \enquote{Bad} By Both & 236 & 0.31 & 0.37 & 0.37 & 0.38 & 0.30 \\
+ \hline
+ Assigned \enquote{Bad} By Either & 180 & 0.47 & 0.50 & 0.48 & 0.48 &  0.34 \\
+ \hline
+ Assigned \enquote{Bad} or \enquote{Other} By Either & 154 & 0.47 & 0.59 & 0.54 & 0.50 &  0.35 \\
+ \hline
+\end{tabular}}
+\caption{\label{kappa_table_TPE}Table of Fleiss' kappa coefficient to measure the degree of agreement between persons (HvH), persons with FC model (H+FC), persons with CNNLSTM model, persons with all models (H+ALL), and between the 3 models. \enquote{Drop Rule} column indicates if any samples were dropped. We show the measurements after dropping samples if they are deemed bad by either or both responders. We also show measurements after dropping the \enquote{other} category along with samples deemed bad by either responder. }
+\end{table}
+To measure the quality of the samples produced by our pipeline combined with the TP ear models, we run the model until an adequate number of samples in each category are saved to disk. Next, we randomly generated around 50 samples in the following categories: \enquote{snare}, \enquote{kick}, \enquote{hat}, \enquote{clap} and \enquote{other} (combination of rims, 
+shakers and unusual percussive sounds). This gave us a total of 257 samples. These samples were determined to be percussive and then categorized by 4 different models (FC, CNNLSTM, E+F and AVG). We ensured a balanced division between samples of stack size 1, 2 and 4 (each stack is responsible for a third of the samples under each category). Both reviewers then categorized these samples without knowledge of other categorizations (person or computation models). Additionally, each responder had the option of labeling samples as \enquote{bad} for samples that they deemed not percussive. 
+
+We assess the reliability of agreement between persons and categorization models via the Fleiss' kappa coefficient \cite{fleiss1971measuring}. The value of 0 or less for this coefficient indicates no agreement beyond random chance, and the value of 1 indicating perfect agreement. Our kappa measurements showcased in~\ref{kappa_table_TPE} lie within the 0.35-0.45 range, indicating mild to moderate agreement between persons and machines. We again measure this coefficient after dropping samples that were categorized as \enquote{bad} by the authors, as samples that persons deem to be \enquote{bad} indicate a failure in Phase 1 and should not have been categorized by the models at all.
+
+\section{Survey of Mixed-Models Ear Performance}
+ Keeping the other components of the pipeline the same, we replace the two-phased ear in the previous pipeline with the MME. Our survey differs from the previous survey in that the pipeline only creates the four drum categories. Our main concern here is changes in the amount of \enquote{bad} samples. We show measurements before and after dropping all \enquote{bad} and \enquote{other} samples for a fairer comparison with the TPE pipeline.
+
+ \begin{table}[t]
+ \resizebox{\linewidth}{!}{\begin{tabular}{||c c c c||} 
+ \hline
+ Drop Rule & Size & HvH & H+MME \\
+ \hline
+ No Drop & 300 & 0.336 & 0.250\\ 
+ \hline
+ Assigned Bad By Both & 249 & 0.200 & 0.260 \\
+ \hline
+ Assigned Bad By Either & 151 & 0.460 &  0.473 \\
+ \hline
+Assigned \enquote{Bad} or \enquote{Other} By Either  & 120 & 0.620   &  0.587 \\
+ \hline
+\end{tabular}}
+\caption{\label{kappa_table_MME}Table of Fleiss' kappa coefficient to measure the degree of agreement between persons (HvH) and persons and MME. We also measure the agreeability scores after dropping bad samples if both or either persons assigned the sample as such. We also measure agree-ability when all samples deemed \enquote{bad} or \enquote{other} by either person are removed.}
+\end{table}
+
+\subsection{Takeaways from These Surveys}
+\label{survey2_takeaway}
+The results from the two surveys are not easily comparable. However, no major improvements in agree-ability or a decrease in the number of bad samples can be seen, in fact, the opposite is more likely to be true. However, we are yielding comparable results to the TPE pipeline despite having a fraction of the features to learn from (latent layer + 10 envelope features). This shows that latent layers of an autoencoder network can be used as a low-dimensional proxy for representation of more complex inputs, despite the autoencoder not being trained for such a task. Agree-ability scores for MME pipeline are often lower, but we reiterate that this can be caused by having two out of six (rather than one out of six in the TPE pipeline) categories which are exclusive to survey responders. Supporting this hypothesis is the notable improvement in agree-ability observed after dropping all \enquote{bad} and \enquote{other} samples. Here, both persons agree with each other and with the MME at a stronger rate than in the TPE pipeline, despite having similar number of samples (120 for MME and 154 for TPE) and equal number of categories to choose from. This values are observed in the last rows of tables~\ref{kappa_table_TPE} and ~\ref{kappa_table_MME}. The higher DVD categorization accuracy achieved by the mixed-model ear compared to the best two-phaased ear is consistent with this observation: Given that the sound being categorized is a drum, the MME will yield better results that the TPE. However, the MME pipeline does not yield better results in the DVN task. 
+\begin{itemize}
+    \item The survey brings into question the reliability of our phase 1 models, as 30\% of the generated samples were deemed not percussive by at least 1 reviewer and 8\% by both reviewers
+    \item The task of categorizing synthetic drums is difficult. Survey shows that the scale of agreement within persons as well as between persons and various model combinations is moderate at best, even after removal of \enquote{bad} samples.  While the same models can easily achieve 98+ percent accuracy when tested on sounds from physical drum samples. 
+    \item While there is much room for improvement, our pipelines can generate and categorize drums and percussive sounds with a promising degree of success. 
+\end{itemize}
 \bibliographystyle{apacite}
 \bibliography{CSMC_MUME_LaTeX_Template.bib}
 
@@ -237,7 +295,7 @@ RadarDB & 1054 & 842   & 353 & 349 &  353 & 1561& 131 & 121 \\ \hline
 \end{table}
 
 %=============
-\chapter{Audio Transformation functions}
+\chapter{Audio Transformation Functions}
 \label{appendix:B}
 \begin{figure}
 \centering
@@ -270,8 +328,10 @@ Using the described features, we trained several neural network models for Phase
 \end{enumerate}
 Unlike EE models, parameters are hand-picked and un-tuned. Higher accuracy rates in these models do not necessarily translate to higher agreeableness with surveyors. Since the positive sounds in the hearing test are sourced from a synthesizer, model accuracy on test data alone cannot be relied upon when the domain of sounds 
 being categorized is switched.
-\section{Embedding Models}
 
+\chapter{AutoEncoder Structures and Hyper-Parameter Optimization}
+\label{appendix:D}
+\section{Possible Model Structures}
 \begin{table}[[h]
 \begin{tabular}{|p{28mm}|p{25mm}|p{23mm}|p{50mm}|}
 \hline
@@ -328,6 +388,47 @@ Linear-6  & [-1, 600 ] &  77,400 &Decoder's output\\ \hline
 \caption{Fully connected model with 2 hidden dimensions for encoder and decoder. Designed assumes latent size of 8. 30 and 20 are the assumed frequency-bins and step-size values. Total number of parameters is 163,232.}
 \label{table:FC2_AUTOENCODER}
 \end{table}
+\begin{table}[htbp!]
+\centering
+\begin{tabular}{|p{6cm}|p{6cm}|}
+\hline
+Hyper-Param. & Value  \\ \hline
+Model Type      &  CNN  \\ \hline
+Optimizer       & Adam  \\ \hline
+Hidden Layers   & -  \\\hline
+Learning Rate   &  0.001145\\ \hline
+Frequency Bins & 30 \\ \hline
+Time Steps & 20 \\ \hline
+Latent Size & 64 \\ \hline
+Regularization & 3.25^{-6}\\ \hline
+Dropout Rate & 0.5 \\ \hline
+\end{tabular}
+\caption{Top performing hyper-parameter set}
+\label{table:best_params}
+\end{table}
+\chapter{Embedded Feature Visualization}
+\label{appendix:E}
+\begin{figure}[]
+\centering
+\textbf{2 Dimensional Projection of Latent Variables}\par\medskip
+ \includegraphics[width=0.90\linewidth]{images/t-SNE_2d.pdf}
+\caption{Projection of an embedding model's low dimensional encoding on to a 2D plane. We implemented interactions for these graphs for manual inspection of samples. }
+\label{fig:2d_tsne}
+\end{figure}
+
+\begin{figure}[]
+\centering
+\textbf{3D t-SNE Projection}\par\medskip
+\mbox{\subfloat[]{\label{subfig:1} \fbox{\includegraphics[width=12cm,height=6.8cm]{images/3d_t-SNE_symdrum_type_cam0.pdf}}}}
+
+\mbox{\subfloat[]{\label{subfig:2} \fbox{\includegraphics[width=12cm,height=6.8cm]{images/3d_t-SNE_symdrum_type_cam3.pdf}}}}
+
+\fbox{\mbox{\subfloat[]{\label{subfig:2} \includegraphics[width=6cm,height=6cm]{images/3d_t-SNE_symdrum_type_cam1.pdf}}}
+\mbox{\subfloat[]{\label{subfig:2} \includegraphics[width=6cm,height=6cm]{images/3d_t-SNE_symdrum_type_cam2.pdf}}}}
+\caption{3D projections of the data used for Figure~\ref{fig:2d_tsne}. Interactive demos are also implemented for 3D projections.}
+\label{fig:3d_tsne}
+\end{figure}
+
 
 \end{appendices}
 \end{document}

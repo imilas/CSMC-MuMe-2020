@@ -67,30 +67,29 @@ This work is a proof of concept in automatic programming of synthesizers towards
 
 \section{Preamble}
 \subsection{Drums and Percussion}
-Drums are a subcategory of percussive instruments. Almost any object which is struck to produce noise can be referred to as a drum~\cite{latham2002oxford}. Kicks and snares are two of the most universally recognized examples of percussion~\cite{barry2005drum}. The term \enquote{Percussion} often encompasses all drums and may include the additional instruments which may be rubbed, plucked, blown, etc; A more strict definition of percussion can be used interchangeably with drums~\cite{latham2002oxford}. We adapt this strict definition for this work as our concern is not the delineation between the two overlapping concepts, but with extraction and creation of novel sounds with characteristics shared between the two. As a result, we often use the terms \enquote{drum} and \enquote{percussion} interchangeably.
+Drums are a subcategory of percussive instruments. Almost any object which is struck to produce noise can be referred to as a drum~\cite{latham2002oxford}. Under strict definitions, the terms can be used interchangeably~\cite{latham2002oxford}. We adapt this strict definition as our work is not concerned the delineation between the two overlapping concepts, but with creation of synthetic sounds which can be used by digital sound artists as replacements for organic drums or percussion. In this work, the terms \enquote{drum} and \enquote{percussion} are often interchangeable.
 
 \subsection{Motivation and Goals}
-Digital recordings of novel, one-shot\footnote{A single hit on the drum that captures its capabilities} drum sounds are not easy or cheap to find. Our goal here is to create a new, virtual source of novel drum sounds, which could then be used in electronic music compositions. By relying on recordings of \textit{real life} drum sounds, we are limited by what instruments exist in the real world and whether or not we have access to clean, one-shot recordings. Our hypothesis is that the virtualization of sound generation can alleviate these material limitations.
+Digital recordings of novel, one-shot\footnote{A single hit on the drum that captures its capabilities} drum sounds are commonly used in  electronic music compositions. Yet unique drum sounds are not easy or cheap to find. By relying on recordings of \textit{real life} drum sounds, artitsts are limited by what instruments exist in the real world and whether or not high-quality, one-shot recordings can be accessed. Virtual sources of novel drum sounds can alleviate these material limitations.
 
-
-
- \begin{figure}[t!]
+ \begin{figure}
     \begin{center}
     \textbf{Pipeline Design}
     \makebox[\textwidth]{
     \fbox{\includegraphics[width=1\linewidth]{images/pipeline.pdf}}}
     \end{center}
-    \caption{A blueprint of our desired pipeline which allows each component to be implemented in a number of ways. Our implementations of this pipeline allow for easy parallelization when needed. 
+    \caption{A blueprint of our desired pipeline which allows each component to be implemented in a number of ways. Our implementations of this pipeline allow for easy parallelization when needed. This implementation also allows for easy integration of heuristic search for future works.
     }
 \label{fig:pipeline_outline}
 \end{figure}
 
-
-
 \subsection{Related Works}
+
+Numerous deep, neural network models have been proposed and utilized for the purpose of signal generation in recent years. WaveGans and WaveNet have been subject to significant improvements and experiments since their proposal~\cite{nsynth2017,yamamoto2020parallel,oord2017parallel}. Particularly relevant are the utilization of variational autoencoders (VAE's) for generation of percussive samples~\cite{aouameur2019neural} and generation of percussive sounds by decoding a small set of latent features~\cite{ramires2020neural}.
+Automatic programming of virtual synthesizers has long been a topic of interest. In early 2000s, Interactive Genetic Algorithms (IGA's) were utilized for the generation of new sounds with various sound-engines~\cite{johnson1999exploring,dahlstedt2001creating}. More recent work by Yee-King et al.~\cite{yee2018automatic} used Long short-Term Memory (LSTM) models and genetic algorithms to find the exact parameters used to create a group of sounds. The sounds approximated were made by the same virtual synthesizer, not an external source; making the eventual replication certain even with random search. Since this work appears more focused on pads and textures rather than drums, feature matching appears to not be concerned with the envelope of the sounds but rather the frequency content within arbitrary time windows. Yet another recent work by Esling et al. used a large dataset of over 10,000 presets for a coMEMrcial VST synthesizer to learn a latent parameter space which can be sampled for creation of new audio~\cite{esling2019universal}. As stated before, our work explores the rapid approximation of percussion sounds with no previous knowledge about the sonic capabilities of our virtual synthesizer, exploring the actual parameter space rather than its latent representation.
 \label{related_works}
 \begin{center}
-\begin{table}[h]
+\begin{table}
 \resizebox{\linewidth}{!}{\begin{tabular}{|c c c c|} 
 \hline
 Work & Feature extraction & Synthesis & Specilization & \hline
@@ -104,9 +103,6 @@ Yamamoto 2020 & GAN & GAN & Speech & \hline
 \end{table}
 \label{table:recent_works}
 \end{center}
-Numerous deep, neural network models have been proposed and utilized for the purpose of signal generation in recent years. WaveGans and WaveNet have been subject to significant improvements and experiments since their proposal~\cite{nsynth2017,yamamoto2020parallel,oord2017parallel}. Particularly relevant are the utilization of variational autoencoders (VAE's) for generation of percussive samples~\cite{aouameur2019neural} and generation of percussive sounds by decoding a small set of latent features~\cite{ramires2020neural}.
-Automatic programming of virtual synthesizers has long been a topic of interest. In early 2000s, Interactive Genetic Algorithms (IGA's) were utilized for the generation of new sounds with various sound-engines~\cite{johnson1999exploring,dahlstedt2001creating}. More recent work by Yee-King et al.~\cite{yee2018automatic} used Long short-Term Memory (LSTM) models and genetic algorithms to find the exact parameters used to create a group of sounds. The sounds approximated were made by the same virtual synthesizer, not an external source; making the eventual replication certain even with random search. Since this work appears more focused on pads and textures rather than drums, feature matching appears to not be concerned with the envelope of the sounds but rather the frequency content within arbitrary time windows. Yet another recent work by Esling et al. used a large dataset of over 10,000 presets for a coMEMrcial VST synthesizer to learn a latent parameter space which can be sampled for creation of new audio~\cite{esling2019universal}. As stated before, our work explores the rapid approximation of percussion sounds with no previous knowledge about the sonic capabilities of our virtual synthesizer, exploring the actual parameter space rather than its latent representation.
-
 \subsection{Our Approach}
 To virtually create novel drum sounds, we need a tractable, generative source of audio; One that deterministically produces audio based on a set of instructions. Additionally, we need a method of evaluation to help us determine which sounds resemble drums and are worth keeping. To enable heuristic search, we would like to know what instructions caused our audio source to make the sounds we liked. Given these two components capable of \textit{generation} and \textit{evaluation} of sounds, we build a generative pipeline of audio as depicted in figure~\ref{fig:pipeline_outline}. The success of this pipeline is dependent on the characteristics of the components responsible for the generation and evaluation of the sounds. We call these two components the \emph{virtual synthesizer} and \emph{virtual ear} respectively.  
 
@@ -190,11 +186,8 @@ To test this, we implemented interactive projection graphs. These graphs allow i
 
 \section{Pipelines and Surveys}
 \label{surveys}
-With our virtual synthesizer and virtual ears in place, we build two pipelines. We chose CNNLSTM-DVN for \hypref{Decision.1}, and FC-DVD,CNNLSTM-DVD and E/F for \hypref{Decision.2} to build the TPE pipeline. The MEM pipeline uses our best MEM, which simultaneously classifies sounds as drums and categorizes them. 
-The TPE pipeline produces samples in the following categories: \enquote{snare}, \enquote{kick}, \enquote{hat}, \enquote{clap} and \enquote{other} (combination of rims, shakers and unusual percussive sounds). The MEM pipeline does not output the \enquote{other} category, yet the option is available to surveyors when categorizing sounds manually.   
-The sounds and the corresponding synthesizer programs are saved to hard-disk. Here we assess the success rate of two different pipelines---and by extension, the virtual ears---by manual inspection of sounds categorized as drums, as well as the category of those drums. Both authors categorized a subset of the results without knowledge of the drum categorization outcomes. Additionally, each responder had the option of labeling samples as \enquote{bad} for samples that they deemed not percussive.  The percentage of sounds labeled as \enquote{bad} by the authors is a measurement of success with regards to \hypref{Decision.1}. We measure success with regards to \hypref{Decision.2}---the reliability of agreement between persons and drum categorization models--- via the Fleiss' kappa coefficient \cite{fleiss1971measuring}. The value of 0 or less for this coefficient indicates no agreement beyond random chance, and the values of 1 indicates perfect agreement. We again measure this coefficient after dropping samples that were categorized as \enquote{bad} by one or both authors. We also show measurements after dropping all \enquote{bad} and \enquote{other} samples.
-\begin{table}[htbp]
- \resizebox{\linewidth}{!}{\begin{tabular}{|c c c c c c c|} 
+\begin{table}
+ \begin{tabular}{|c c c c c c c|} 
  \hline
  Drop Rule & Size & H+H & H+FC & H+CNN & H+E/F & 3 models \\ [0.5ex] 
  \hline
@@ -206,11 +199,11 @@ The sounds and the corresponding synthesizer programs are saved to hard-disk. He
  \hline
  Assigned \enquote{Bad} or \enquote{Other} By Either & 154 & 0.47 & 0.59 & 0.54 & 0.50 &  0.35 \\
  \hline
-\end{tabular}}
-\caption{\label{kappa_table_TPE}Table of Fleiss' kappa coefficient to measure the degree of agreement between persons (H+H), persons with FC model (H+FC), persons with CNNLSTM model, persons with all models (H+E/F), and between the 3 models. \enquote{Drop Rule} column indicates if any samples were dropped. We show the measurements after dropping samples if they are deemed bad by either or both responders. We also show measurements after dropping the \enquote{other} category along with samples deemed bad by either responder. }
+\end{tabular}
+\caption{\label{kappa_table_TPE}Table of Fleiss' kappa coefficient to measure the degree of agreement between persons (H+H), persons with FC model (H+FC), persons with CNNLSTM model, persons with all models (H+E/F), and between the 3 models. }
 \end{table}
 
- \begin{table}[t]
+ \begin{table}
  \resizebox{\linewidth}{!}{\begin{tabular}{||c c c c||} 
  \hline
  Drop Rule & Size & H+H & H+H+MEM \\
@@ -224,8 +217,12 @@ The sounds and the corresponding synthesizer programs are saved to hard-disk. He
 Assigned \enquote{Bad} or \enquote{Other} By Either  & 120 & 0.62   &  0.59 \\
  \hline
 \end{tabular}}
-\caption{\label{kappa_table_MEM}Table of Fleiss' kappa coefficient to measure the degree of agreement between persons (H+H) and persons with MEM (H+MEM). We also measure the agree-ability scores after dropping bad samples if both or either persons assigned the sample as such. We also measure agree-ability when all samples deemed \enquote{bad} or \enquote{other} by either person are removed.}
+\caption{\label{kappa_table_MEM}Table of Fleiss' kappa coefficient to measure the degree of agreement between persons (H+H) and persons with MEM (H+MEM).}
 \end{table}
+With our virtual synthesizer and virtual ears in place, we build two pipelines. We chose CNNLSTM-DVN for \hypref{Decision.1}, and FC-DVD,CNNLSTM-DVD and E/F for \hypref{Decision.2} to build the TPE pipeline. The MEM pipeline uses our best MEM, which simultaneously classifies sounds as drums and categorizes them. 
+The TPE pipeline produces samples in the following categories: \enquote{snare}, \enquote{kick}, \enquote{hat}, \enquote{clap} and \enquote{other} (combination of rims, shakers and unusual percussive sounds). The MEM pipeline does not output the \enquote{other} category, yet the option is available to surveyors when categorizing sounds manually.   
+The sounds and the corresponding synthesizer programs are saved to hard-disk. Here we assess the success rate of two different pipelines---and by extension, the virtual ears---by manual inspection of sounds categorized as drums, as well as the category of those drums. Both authors categorized a subset of the results without knowledge of the drum categorization outcomes. Additionally, each responder had the option of labeling samples as \enquote{bad} for samples that they deemed not percussive.  The percentage of sounds labeled as \enquote{bad} by the authors is a measurement of success with regards to \hypref{Decision.1}. We measure success with regards to \hypref{Decision.2}---the reliability of agreement between persons and drum categorization models--- via the Fleiss' kappa coefficient \cite{fleiss1971measuring}. The value of 0 or less for this coefficient indicates no agreement beyond random chance, and the values of 1 indicates perfect agreement. We again measure this coefficient after dropping samples that were categorized as \enquote{bad} by one or both authors. We also show measurements after dropping all \enquote{bad} and \enquote{other} samples.
+
 
 \subsection{Survey Discussion}
 \label{survey2_takeaway}
@@ -234,6 +231,8 @@ Due to the discrepancy in categorization and output groups, results from the two
 
 \bibliographystyle{apacite}
 \bibliography{CSMC_MUME_LaTeX_Template.bib}
+
+
 \begin{appendices}
 \chapter{Datasets}
 \label{appendix:A}

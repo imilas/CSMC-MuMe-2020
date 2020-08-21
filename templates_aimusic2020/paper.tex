@@ -78,7 +78,7 @@ Digital recordings of novel, one-shot\footnote{A single hit on the drum that cap
 
  \begin{figure}[t]
     \begin{center}
-    \textbf{Generative System}
+    % \textbf{Generative System}
     \makebox[\textwidth]{
     \fbox{\includegraphics[width=1\linewidth]{images/pipeline.pdf}}}
     \end{center}
@@ -112,7 +112,7 @@ LP filter Cuttoff & 20000-HP & never lower than HP cutoff\\
 Filter Order & 4,8,16 & butterworth filter order \\
 \hline
 \end{tabular}}
-\caption{Synthesizer submodule Parameters. Despite the simplicity of the parameters and our efforts at constraining the ranges, the number of parameters that can be randomly chosen for each submodule is over $10^{15}$. Each synthesizer can contain any number of submodules }
+\caption{Synthesizer submodule parameters. Despite the simplicity of the parameters and our efforts at constraining the ranges, the number of parameters that can be randomly chosen for each submodule is over $10^{15}$. Each synthesizer can contain any number of submodules}
 \label{table:submodule_params}
 \end{table}
 Digital sound is a series of discrete values. \textit{Digital synthesis} of audio is the process of creating these values. Here, we do not employ probabilistic models for the synthesizer component. Our decision is based on the following factors:
@@ -125,11 +125,22 @@ Digital sound is a series of discrete values. \textit{Digital synthesis} of audi
 
 %  Evaluation of a periodic function such as sine or cosine is the simplest form of software audio generation~\cite{mitchell2009basicsynthChap5}. This generative system is called an \textit{oscillator}. With careful programming, DSP techniques can be used to replicate almost any sound~\cite{jenkins2019analog}. Synthesizers we build using these functions are tractable and explainable: the output is determined by the input and reproducible. This makes the evaluation of a set of inputs (or parameters) to our synthesizers relatively simple.
  
+ \begin{figure}[t]
+    \begin{center}
+    % \textbf{Synthesizer SubModule }
+    \makebox[\textwidth]{
+    \fbox{\includegraphics[width=1\linewidth]{templates_aimusic2020/images/synthesizer_block.pdf}}}
+    \end{center}
+    \caption{High level representation of pre-rendering steps for each submodule. Each Synthesizer contains 1 or more these submodules. The output of a synthesizer is the normalized addition of all its submodule outputs. Each synthesizer program determines the number of these submodules and their parameters. 
+    }
+\label{fig:pipeline_outline}
+\end{figure}
+
+
 We rely on a set of classical DSP methods to build our synthesizer, which allows for quick, offline, and parallel generation of audio signals without the usage of GPUs. We made extensive use of Pippi\footnote{https://github.com/luvsound/pippi} and SciPy~\cite{jones2001scipy} libraries. Our virtual synthesizer contains a set of one or more submodules. Each submodule is a self-contained noise making unit. Submodules have identical sets of parameters, but widely different outputs can be achieved depending on the values assigned. The set of parameters available to each submodule is highlighted in Table~\ref{table:submodule_params}. The sonic output of the virtual synthesizer is the normalized addition of the sonic output of its submodules. Our implementation of a synthesizer can have any number of submodules. The parameters that dictate the output signal of each submodule as well as the range of values each parameter can take are shown in table~\ref{table:submodule_params}. We call the number of submodules in each virtual synthesizer the \textit{stack size}. We call the sets of parameter values that characterize a synthesizer's submodules a \textit{program} (analogous to a preset for a VST).   
 
 \section{Virtual Ear}
-
-We are not looking for the perfect imitation of organic drums using a synthesizer. We seek to imitate drums using a synthesizer and even \textbf{prefer} for its generations to retain novel, unusual characteristics. The task assigned to the virtual ear is the rare acceptance of drum-like sounds and the inevitable rejection of most \enquote{noise} outputs from the virtual synthesizer. The virtual ear makes two critical decisions: 
+The task assigned to the virtual ear is the rare acceptance of drum-like sounds and the inevitable rejection of most \enquote{noise} outputs from the virtual synthesizer. Our goal is not realism; We want the virtual ear to accept novel and unusual drum sounds. The virtual ear makes two critical decisions: 
 \emph{
 \begin{quote}
 \text{Decision.1 Could the sound be used as a drum?}\label{Decision.1}

@@ -51,65 +51,49 @@
 
 % the affiliations are given next; don't give your e-mail address
 % unless you accept that it will be published
-\institute{Department of Computing Science\\ University of Alberta \\ \email{asalimi@ualberta.ca}}
+\institute{Department of Computing Science\\ University of Alberta \\ \email{asalimi@ualberta.ca\\ }}
 
 % intro, 1 page
 % background and methodology 2 pages
 % implementation 
 % results 2.5
 \maketitle
-% For more than two decades research involving digital synthesis, heuristic search, and neural networks has been used for the generation of novel sounds.
-\begin{abstract}
-This work is a proof of concept in automatic programming of synthesizers towards their best approximation of drum sounds. Our approach is based on the combination of two central components: \begin {enumerate*} [label=(\roman*)] \item a \emph{virtual ear} capable of evaluating the proximity of \enquote{unusual} sounds to drum sounds and \item a dynamic \emph{virtual synthesizer} with a rich set of tractable parameters\end{enumerate*}. We present a modular design of a generative pipeline which utilizes (semi-)supervised learning and classical digital signal processing for the generation of one-shot percussive sounds. We present our findings and measurements of a number of approaches taken, particularly in regard to the implementation of an effective virtual ear. Advantages, shortcomings and practicality of the employed methodologies are demonstrated and discussed. We share a number of datasets, notably our curated dataset of free percussive sounds.
 
+\begin{abstract}
+Can we generate drum synthesizers automatically?
+We present an approach for the automatic generation of synthesizer programs for one-shot percussive sounds. 
+Recent advancements in digital synthesis, heuristic search, and neural networks can be utilized for sound generation. 
+Yet the need for data, the problem of open set recognition, and high computational costs persist as barriers towards the expansion of sound libraries using these techniques. 
+We generate quick, scalable, percussion synthesizers using classical signal processing. 
+We train drum classifiers to find and classify synthesizer programs that mimic percussive sounds. 
+We use features from Fourier transformations and autoencoder embeddings to train machine learning classifiers.
+Manual listening tests of the generated sounds demonstrates the system can successfully generate drum synthesizers and categorize drum sounds.
+To facilitate future research, we share our curated dataset of free percussive sounds.
 \keywords{Automatic Synthesizer design. Machine Listening. Sound Analysis. Novelty and Originality}
 \end{abstract}
 
-\section{Preamble}
-\subsection{Drums and Percussion}
-Drums are a subcategory of percussive instruments. Almost any object which is struck to produce noise can be referred to as a drum~\cite{latham2002oxford}. Under strict definitions, the terms can be used interchangeably~\cite{latham2002oxford}. We adapt this strict definition as our work is not concerned the delineation between the two overlapping concepts, but with creation of synthetic sounds which can be used by digital sound artists as replacements for organic drums or percussion. In this work, the terms \enquote{drum} and \enquote{percussion} are often interchangeable.
 
-\subsection{Motivation and Goals}
-Digital recordings of novel, one-shot\footnote{A single hit on the drum that captures its capabilities} drum sounds are commonly used in  electronic music compositions. Yet unique drum sounds are not easy or cheap to find. By relying on recordings of \textit{real life} drum sounds, artists are limited by what instruments exist in the real world and whether or not high-quality, one-shot recordings can be accessed. Virtual Studio Technology (VST)~\cite{tanev2013virtual} and other DSP based software have given artists unprecedented access to complex audio synthesizers. Utilization of virtual synthesizers for creation of novel drum sounds can alleviate these material limitations. 
+\section{Introduction} 
+Digital recordings of novel, one-shot\footnote{A single hit on the drum that captures its capabilities} drum sounds are commonly used in  electronic music compositions. Yet unique drum sounds can be difficult or expensive to find. By relying on recordings of \textit{real life} drum sounds, artists are limited by what instruments exist in the real world and whether or not high-quality, one-shot recordings can be accessed. We believe automatic programming of virtual synthesizers for the creation of novel drum sounds can alleviate these material limitations. To this end, we implement a programmable virtual synthesizer of audio, which we call the \emph{virtual synthesizer}. We also implement machine learning classifiers for automatic separation of percussive sounds from non-percussive sounds. To effectively train the classifiers with small datasets, we simplify the representation of audio data by experimenting with fast Fourier transform (FFT) features and autoencoder embeddings. We call our system of feature extraction and classification of sounds the \emph{virtual ear}. To create a dataset of synthetic drums, the virtual synthesizer produces random programs and generates the corresponding audio. This audio is then categorized by the virtual ear. We save not just the desirable sounds, but also the programs which generated these sounds. These programs can be modified and experimented on by sound designers, or used for an improved search algorithm in future works. We build generative systems using different implementations of the virtual ear, and conduct manual hearing tests of the generated sounds. Our results are promising as the majority of sounds generated from our systems are deemed percussive by human listeners. However, we cannot quantify the novelty of these sounds. 
 
- \begin{figure}
+ \begin{figure}[t]
     \begin{center}
-    \textbf{Pipeline Design}
+    \textbf{Generative System}
     \makebox[\textwidth]{
     \fbox{\includegraphics[width=1\linewidth]{images/pipeline.pdf}}}
     \end{center}
-    \caption{A blueprint of our desired pipeline which allows each component to be implemented in a number of ways. Our implementations of this pipeline allow for easy parallelization when needed. This implementation also allows for easy integration of heuristic search for future works.
+    \caption{A blueprint of our system which allows each component to be implemented in a number of ways. Our implementations of this pipeline allow for easy parallelization when needed. This implementation also allows for easy integration of heuristic search for future works. 
     }
 \label{fig:pipeline_outline}
 \end{figure}
 
-\subsection{Related Works}
-
-Numerous deep, neural network models have been proposed and utilized for the purpose of signal generation in recent years. WaveGans and WaveNet have been subject to significant improvements and experiments since their proposal~\cite{nsynth2017,yamamoto2020parallel,oord2017parallel}. Particularly relevant are the utilization of variational autoencoders (VAE's) for generation of percussive samples~\cite{aouameur2019neural} and generation of percussive sounds by decoding a small set of latent features~\cite{ramires2020neural}. Automatic programming of virtual synthesizers has long been a topic of interest. In early 2000s, Interactive Genetic Algorithms (IGA's) were utilized for the generation of new sounds with various sound-engines~\cite{johnson1999exploring,dahlstedt2001creating}. More recent work by Yee-King et al.~\cite{yee2018automatic} used Long short-Term Memory (LSTM) models and genetic algorithms to find the exact parameters used to create a group of sounds. The sounds approximated were made by the same virtual synthesizer, not an external source; making the eventual replication certain even with random search. Since this work appears more focused on pads and textures rather than drums, feature matching appears to not be concerned with the envelope of the sounds but rather the frequency content within arbitrary time windows. Yet another recent work by Esling et al. used a large dataset of over 10,000 presets for a commercial VST synthesizer to learn a latent parameter space which can be sampled for creation of new audio~\cite{esling2019universal}.
-
-\label{related_works}
-\begin{table}[t!]
-\begin{center}
-\begin{tabular}{|c c c c|} 
-\hline
-Work & Feature extraction & Synthesis & Specilization \\ \hline
-Oord 2017 & CNN & CNN & Speech \\  \hline
-Yee-King 2018 & LSTM on Paremters & DSP & Synth Pads \\  \hline
-Aouameur 2019 & Latent layer& Decoding of Latent Layers & Percussion \\  \hline
-Ramires 2020 & Latent layer & FeedForward Network & Percussion \\  \hline
-Yamamoto 2020 & GAN & GAN & Speech \\  \hline
-\end{tabular}
-\caption{Quick reference of recent related works}
-\label{table:recent_works}
-\end{center}
-\end{table}
-\subsection{Our Approach}
-We explore the approximation of percussive sounds with no previous knowledge about the sonic capabilities of a virtual synthesizer. To virtually create novel drum sounds, we need a tractable, generative source of audio; One that deterministically produces audio based on a set of instructions. Additionally, we need a method of evaluation to help us determine which sounds resemble drums and are worth keeping. To enable heuristic search in future works, we would like to know what instructions caused our audio source to make the sounds we liked. Given components capable of \textit{generation} and \textit{evaluation} of sounds, we build a generative pipeline of audio as depicted in figure~\ref{fig:pipeline_outline}. The success of this pipeline is dependent on the characteristics of the components responsible for the generation and evaluation of the sounds. We call these two components the \emph{virtual synthesizer} and \emph{virtual ear} respectively.
+\section{Related Works}
+Numerous deep neural network models have been proposed for the purpose of signal generation in recent years. WaveGans and WaveNet have been subject to significant improvements and experiments since their proposal~\cite{nsynth2017,yamamoto2020parallel,oord2017parallel}. Particularly relevant works are the utilization of variational autoencoders (VAE's) for generation of percussive samples~\cite{aouameur2019neural} and generation of percussive sounds by decoding a small set of latent features~\cite{ramires2020neural}. Automatic programming of virtual synthesizers has long been a topic of interest. In early 2000s, Interactive Genetic Algorithms (IGA's) were utilized for the generation of new sounds with various sound-engines~\cite{johnson1999exploring,dahlstedt2001creating}. More recent work by Yee-King et al.~\cite{yee2018automatic} used Long short-Term Memory (LSTM) models and genetic algorithms to find the exact parameters used to create a group of sounds. The sounds approximated were made by the same virtual synthesizer and not with an external source, making the eventual replication certain even with random search. Yet another recent work by Esling et al. used a large dataset of over 10,000 presets for a commercial VST synthesizer to learn a latent parameter space which can be sampled for creation of new audio~\cite{esling2019universal}. Here, we work towards the approximation of percussive sounds with no previous knowledge about the sonic capabilities of a virtual synthesizer.
 
 \section{Virtual Synthesizer Design}
 \begin{table}[htbp]
 \centering
-\resizebox{\columnwidth}{!}{\begin{tabular}{ |c|c|c| } 
+\resizebox{\columnwidth}{!}{\begin{tabular}{ |p{4cm}|p{4cm}|p{4cm}| } 
 \hline
 Parameters & Value Range & notes and constraints\\
 \hline \hline
@@ -117,8 +101,8 @@ Attack & 0-3 & A-D-S-R values relative\\
 Decay & 0-3 & relative to A-S-R\\
 Sustain & 0-3 & relative to A-D-R\\
 Release & 0-3 & relative to A-D-S\\
-OSC type & sine,square,saw & tone type\\
-IsNoise & boolean & whether to \newline use OSC type to generate noise\\
+OSC type & sine,square,saw & -\\
+IsNoise & boolean & generate noise using \newline cloud of waveform\\
 Length & 0-1 second & - \\
 StartTime & 0-1 second & Length+Start$<$1\\
 Amplitude & 0.1-1 & 1 = max amplitude\\
@@ -128,20 +112,20 @@ LP filter Cuttoff & 20000-HP & never lower than HP cutoff\\
 Filter Order & 4,8,16 & butterworth filter order \\
 \hline
 \end{tabular}}
-\caption{Synthesizer submodule Parameters. Despite the simplicity of the parameters and our efforts at constraining the ranges, the number of parameters that can be randomly chosen for each submodule is in the order of $10^{15}$ }
+\caption{Synthesizer submodule Parameters. Despite the simplicity of the parameters and our efforts at constraining the ranges, the number of parameters that can be randomly chosen for each submodule is over $10^{15}$. Each synthesizer can contain any number of submodules }
 \label{table:submodule_params}
 \end{table}
-
-Sound is our experience of physical disturbances, causing vibrations in our mediums ~\cite{cook1999chap4}. A sound wave can be viewed as the result of a function which governs amplitude through time, where time and amplitude exist in continuous dimensions. Waves can be approximated via a series of samples, associating time steps to a discrete range of amplitude values. \textit{Digital synthesis} of audio is the process of creating these discrete values. Unlike the majority of the works mentioned in Section~\ref{related_works}, we do not employ probabilistic models for the synthesizer component. Our decision is based on the following factors:
+Digital sound is a series of discrete values. \textit{Digital synthesis} of audio is the process of creating these values. Here, we do not employ probabilistic models for the synthesizer component. Our decision is based on the following factors:
 \begin{itemize}
-    \item \textit{Novelty and Creativity}: Given large sets of examples, generative models such as VAEs and GANS have proven capable of generating samples similar to the exemplars. In this work, we are not aiming for perfect imitations. We seek to create \emph{novel sounds} by via artifical, exploratory creativity. Boden defines this concept as an emergent property of generative work within confined rule sets~\cite{boden2009computer}. Ultimately, we wish to work within the limitations of any tractable sound source to create its approximations of a given sound category. Within the music realm, a prominent instance of exploratory creativity is the persistent aesthetics of 8-bit soundtracks, remaining popular long after the original constraints are lifted~\cite{collins2007loop}.
+    \item \textit{Novelty and Creativity}: Given large sets of examples, generative models such as VAEs and GANS have proven capable of generating samples similar to the exemplars. In this work, we are not aiming for perfect imitations. We seek to create \emph{novel sounds} by via artificial, exploratory creativity. Boden defines this concept as an emergent property of generative work within confined rule sets~\cite{boden2009computer}. Ultimately, we wish to work within the limitations of any tractable sound source to create its approximations of a given sound category. Within the music realm, a prominent instance of exploratory creativity is the persistent aesthetics of 8-bit soundtracks, remaining popular long after the original constraints are lifted~\cite{collins2007loop}.
     \item \textit{Interpretability}: Neural networks are often described as black boxes~\cite{basheer2000artificial}. Their highly recursive structure makes modern explanation methods such as saliency maps unreliable~\cite{rudin2019stop}.  
-    \item \textit{Speed of Rendering at high sampling rates}: Despite the utilization of powerful GPUs, the standard sampling rate in most audio generation work utilizing neural is under 24 khz \cite{yamamoto2020parallel,oord2017parallel,aouameur2019neural,ramires2020neural}. However, a significant number of untrained human ears can detect a change in quality of audio between sampling rates of 192 khz and the industry standard of 44.1 khz \cite{reiss2016meta}. In this work, we fix our sampling rate 48 khz. 
+    \item \textit{Speed of Rendering at high sampling rates}: Despite the utilization of powerful GPUs, the standard sampling rate in most audio generation work utilizing neural networks is under 24 khz ~\cite{yamamoto2020parallel,oord2017parallel,aouameur2019neural,ramires2020neural}. However, a significant number of untrained human ears can detect a change in quality of audio between sampling rates of 192 khz and the industry standard of 44.1 khz \cite{reiss2016meta}. At our fixed sampling rate of 48 khz, synthesizers with stack sizes of 8 can create and save 1 sounds to hard-disk with an average rendering time of 50 milliseconds\footnote{Using a single process on a Macbook Air 2012 and Ubuntu 18.04}. 
+    \item \textit{Flexibility and Scaling}: Probabilistic audio generation is often done sequentially. For example, state of the art, parallel wave generation with GANs requires a fixed amount for rendering time for each time-step~\cite{yamamoto2020parallel}. Our virtual synthesizer produces audio by solving a linear system of equations. The added footprint of increasing the length of rendered sounds or higher sampling rates is relatively minuscule.  
 \end{itemize}
 
- Evaluation of a periodic function such as sine or cosine is the simplest form of software audio generation~\cite{mitchell2009basicsynthChap5}. This generative system is called an \textit{oscillator}. With careful programming, DSP techniques can be used to replicate almost any sound, which is why they have powered commercial digital synthesizers for over half a century ~\cite{jenkins2019analog}. Synthesizers we build using these functions are tractable and explainable: the output is determined by the input and reproducible. This makes the evaluation of a set of inputs (or parameters) to our synthesizers relatively simple.
+%  Evaluation of a periodic function such as sine or cosine is the simplest form of software audio generation~\cite{mitchell2009basicsynthChap5}. This generative system is called an \textit{oscillator}. With careful programming, DSP techniques can be used to replicate almost any sound~\cite{jenkins2019analog}. Synthesizers we build using these functions are tractable and explainable: the output is determined by the input and reproducible. This makes the evaluation of a set of inputs (or parameters) to our synthesizers relatively simple.
  
-We opted for a set of classical DSP methods to build our synthesizer, which allow for quick offline, and parallel generation of audio signals without the usage of GPUs. We made extensive use of Pippi\footnote{https://github.com/luvsound/pippi} and SciPy~\cite{jones2001scipy} libraries. Our virtual synthesizer contains a set of one or more submodules. Each submodule is a self-contained noise making unit. Submodules have identical sets of parameters, but widely different outputs can be achieved depending on the values assigned. The set of parameters available to each submodule is highlighted in Table~\ref{table:submodule_params}. The sonic output of the virtual synthesizer is the normalized addition of the sonic output of its submodules. Our implementation of a synthesizer can have any number of submodules. The parameters that dictate the output signal of each submodule as well as the range of values each parameter can take are shown in table~\ref{table:submodule_params}. We call the number of submodules in each virtual synthesizer the \textit{stack size}. We call the sets of parameter values that characterize a synthesizer's submodules a \textit{program} (analogous to a preset for a VST).   
+We rely on a set of classical DSP methods to build our synthesizer, which allows for quick, offline, and parallel generation of audio signals without the usage of GPUs. We made extensive use of Pippi\footnote{https://github.com/luvsound/pippi} and SciPy~\cite{jones2001scipy} libraries. Our virtual synthesizer contains a set of one or more submodules. Each submodule is a self-contained noise making unit. Submodules have identical sets of parameters, but widely different outputs can be achieved depending on the values assigned. The set of parameters available to each submodule is highlighted in Table~\ref{table:submodule_params}. The sonic output of the virtual synthesizer is the normalized addition of the sonic output of its submodules. Our implementation of a synthesizer can have any number of submodules. The parameters that dictate the output signal of each submodule as well as the range of values each parameter can take are shown in table~\ref{table:submodule_params}. We call the number of submodules in each virtual synthesizer the \textit{stack size}. We call the sets of parameter values that characterize a synthesizer's submodules a \textit{program} (analogous to a preset for a VST).   
 
 \section{Virtual Ear}
 
@@ -161,19 +145,19 @@ We are not looking for the perfect imitation of organic drums using a synthesize
     \includegraphics[width=0.95\linewidth]{images/venn_data.pdf}}
     \end{center}
     \caption{ 
-    Scales are symbolic (true scales are not measurable and/or subjective).  $\mathcal{N}$ is the set of percussive sounds a synthesizer is capable of making. Our positive samples, $\mathcal{T^{+}}$, is a small fraction of a wide variety of percussive sounds that are conceivable. The size of $\mathcal{T^{-}}$ can be set to any number(we can generate as any number of random samples), but we prefer to keep it no larger than  $\mathcal{T^{+}}$. $\mathcal{H}$ is a series of sounds sent to the ear for classification. The ideal ear will detect  $\mathcal{H^{+}}$, the overlap of $\mathcal{H}$ and $\mathcal{N}$, with high precision and recall. 
+    Not to scale (true scales are not measurable and/or subjective).  $\mathcal{N}$ is the set of percussive sounds a synthesizer is capable of making. The inclusion of sounds in this group may vary from person to person. Our positive samples, $\mathcal{T^{+}}$, is a small fraction of a wide variety of percussive sounds that are conceivable. For $\mathcal{T^{-}}$, we can generate any number of random samples. $\mathcal{H}$ is a series of sounds sent to the ear for classification. The ideal ear will detect  $\mathcal{H^{+}}$, the overlap of $\mathcal{H}$ and $\mathcal{N}$, with high precision and recall. 
     }
 \label{fig:ven_data}
 \end{figure}
-\hypref{Decision.1} requires knowledge of what drums \textbf{do not} sound like, or knowledge of an infinitely large set, which cannot be fully represented via examples. An important consideration is that the source of sounds used in training the model (organic drum sounds) will be fundamentally different from the source of unlabeled sounds we wish to categorize (noise from a synthesizer). This issue is reflective of the OSR problem~\cite{geng2020recent,mundt2019open}. Figure~\ref{fig:ven_data} highlights a number of caveats with this approach. we denote $\mathcal{N}$ as the set of percussive sounds a synthesizer is capable of making. $\mathcal{T^{+}}$, our positive examples, is a set of sound extracted from material drums. $\mathcal{T^{-}}$, is a small subset of an infinite set which is meant to represent all noises which the synthesizer is capable of making and likely includes sounds in $\mathcal{N}$. During the hearing test, the virtual ear continually receives synthesizer noises for classification. The set of received noises is denoted as $\mathcal{H}$. The performance of the ear is measured by its precision and recall in finding the overlap between $\mathcal{H}$ and $\mathcal{N}$. It is important to ensure that the change in learning domains---particularly with the case of positive examples of percussive sounds---does not interfere with transformation of knowledge from the training of the ear to the hearing test. To maximize the transference of knowledge from one domain to another, we seek to learn from agnostic feature sets that capture fundamental characteristics of the data points.
+\hypref{Decision.1} requires knowledge of what drums \textbf{do not} sound like, or knowledge of an infinitely large set, which cannot be fully represented via examples. An important consideration is that the source of sounds used in training the model (organic drum sounds) will be fundamentally different from the source of unlabeled sounds we wish to categorize (noise from a synthesizer). This issue is reflective of the open set recognition (OSR) problem~\cite{geng2020recent,mundt2019open}. We use figure~\ref{fig:ven_data} to highlight a number of caveats with our training approach: We denote $\mathcal{N}$ as the set of percussive sounds a synthesizer is capable of making. $\mathcal{T^{+}}$, our positive examples, is a set of sound extracted from material drums (see Appendix~\ref{appendix:datasets} for details about our datasets). $\mathcal{T^{-}}$ is a small subset of an infinite set used to represent all noises which the synthesizer is capable of making. Moreover, $\mathcal{T^{-}}$ likely includes sounds in $\mathcal{N}$. During the hearing test, the virtual ear continually receives synthesizer noises for classification. The set of received noises is denoted as $\mathcal{H}$. The performance of the ear is measured by its precision and recall in finding the overlap between $\mathcal{H}$ and $\mathcal{N}$. It is important to ensure that the change in learning domains---particularly with the case of positive examples of percussive sounds---does not interfere with transformation of knowledge from the training of the ear to the hearing test. To maximize the transference of knowledge from one domain to another, we seek to learn from agnostic feature sets that capture fundamental characteristics of the data points.
 \subsection{Feature Extraction}
-To train our virtual ear, we require generalizable, domain agnostic features. Various works have demonstrated effective reconstruction of signals given their Short-time Fourier Transforms (STFT) ~\cite{nawab1983signal,griffin1984signal}. If the STFT of a signal can be used its reconstruction, perhaps it can be utilized as a source of fundamental features necessary for audible signal categorization. We defined 3 STFT transformation functions which we believe to capture important, unique attributes of percussive sounds (figure ~\ref{fig:stackspectrums}). Our transformations are GPU based, allowing their application in tandem to the training of the classifier or tuning of STFT transformation during hyper-paramter optimization (see Appendix~\ref{appendix:hyperparam}).
+To train our virtual ear, we require generalizable, domain agnostic features. Various works have demonstrated effective reconstruction of signals given their Short-time Fourier Transforms (STFT)~\cite{nawab1983signal,griffin1984signal}. If the STFT of a signal can be used for its reconstruction, perhaps it can be utilized as a source of fundamental features. We defined 3 STFT transformation functions which we believe to capture important, unique attributes of percussive sounds (figure~\ref{fig:stackspectrums}). Our transformations are GPU based, allowing their application in tandem to the training of the classifier or tuning of STFT transformation during hyper-paramter optimization (see Appendix~\ref{appendix:hyperparam}).
 \subsection{Ear Types}
 \label{classifiers}
 
-Two groups of classifiers are implemented: \emph{two phased ears} (TPEs) and \emph{Mixed Ear Models} (MEMs). TPEs combine different models specializing in~\hypref{Decision.2} or~\hypref{Decision.1} and trained only with our transformation functions. MEMs are a proof of concept attempt at addressing the OSR problem by usage of autoencoded representation of sounds as features. MEMs are trained using highly compressed, automatically encoded representation of sounds and can give simultaneous answers to both questions. Model specifications and measurments for TPE and MEMs can be found in Appendix~\ref{appendix:C}. We speculate that the features used to represent sounds plays a much more important role in determining outcomes, particularly when working with relatively small datasets. 
+Two groups of classifiers are implemented: \emph{two phased ears} (TPEs) and \emph{Mixed Ear Models} (MEMs). TPEs combine different models specializing in~\hypref{Decision.2} or~\hypref{Decision.1} and trained only with our transformation functions. MEMs are a proof of concept attempt at addressing the OSR problem by usage of autoencoded representation of sounds as features. MEMs are trained using highly compressed, automatically encoded representation of sounds and can give simultaneous answers to both questions. Model specifications and extended measurements for TPE and MEMs can be found in Appendix~\ref{appendix:classifier_definitions}. We speculate that the features used to represent sounds plays a much more important role in determining outcomes, particularly when working with relatively small datasets. 
 
-The features used by MEMs are encodings extracted from the latent layer of an autoencoder trained to encode and decode spectrogram representations of sound in MixedDB. To better understand the delineation potential of the encoded features, 64-dimensional latent representation of 20\% of MixedDB and 1000 Noise sounds were projected onto a 2 or 3-dimensional planes using t-SNE. Referring to~\hypref{Decision.1} and~\hypref{Decision.2}, we expect the drum sounds to be clustered together, with the majority of the synthetic noise sounds appearing away from these clusters. The projections confirmed that this is the case (see Appendix~\ref{appendix:E}). We are most interested in synthetic noise sounds which appear within or near these clusters. Do these synthetic noise sounds have drum like characteristics?\\ 
+The features used by MEMs are encodings extracted from the latent layer of an autoencoder trained to encode and decode spectrogram representations of sound in MixedDB. To better understand the delineation potential of the encoded features, 64-dimensional latent representation of 20\% of MixedDB and 1000 Noise sounds were projected onto a 2 or 3-dimensional planes using t-SNE. Referring to~\hypref{Decision.1} and~\hypref{Decision.2}, we expect the drum sounds to be clustered together, with the majority of the synthetic noise sounds appearing away from these clusters. The projections confirmed that this is the case ( see Appendix~\ref{appendix:E} for examples of these projections). We are most interested in synthetic noise sounds which appear within or near these clusters. Do these synthetic noise sounds have drum like characteristics?\\ 
 To test this, we implemented interactive projection graphs. These graphs allow interactions such as playing the samples(by hovering the cursor on-top) and movement of the scene camera. Manual inspections revealed a noticeable, positive correlation between a synthetic sound's distance and similarity of a synthetic sound to drum clusters.
 
 \section{Pipelines and Surveys}
@@ -196,9 +180,9 @@ To test this, we implemented interactive projection graphs. These graphs allow i
 \end{table}
 
  \begin{table}
- \resizebox{\linewidth}{!}{\begin{tabular}{||c c c c||} 
+ \resizebox{\linewidth}{!}{\begin{tabular}{|c c c c|} 
  \hline
- Drop Rule & Size & H+H & H+H+MEM \\
+ Drop Rule & Size & H+H & H+MEM \\
  \hline
  No Drop & 300 & 0.34 & 0.25\\ 
  \hline
@@ -211,22 +195,25 @@ Assigned \enquote{Bad} or \enquote{Other} By Either  & 120 & 0.62   &  0.59 \\
 \end{tabular}}
 \caption{\label{kappa_table_MEM}Table of Fleiss' kappa coefficient to measure the degree of agreement between persons (H+H) and persons with MEM (H+MEM).}
 \end{table}
-With our virtual synthesizer and virtual ears in place, we build two pipelines. We chose CNNLSTM-DVN for \hypref{Decision.1}, and FC-DVD,CNNLSTM-DVD and E/F for \hypref{Decision.2} to build the TPE pipeline. The MEM pipeline uses our best MEM, which simultaneously classifies sounds as drums and categorizes them. 
+We built two pipelines and analyzed the results. We the TPE pipeline uses CNNLSTM-DVN for \hypref{Decision.1}, and FC-DVD, CNNLSTM-DVD and E/F for \hypref{Decision.2}. The MEM pipeline uses our best MEM, which simultaneously classifies sounds as drums and categorizes them. 
 The TPE pipeline produces samples in the following categories: \enquote{snare}, \enquote{kick}, \enquote{hat}, \enquote{clap} and \enquote{other} (combination of rims, shakers and unusual percussive sounds). The MEM pipeline does not output the \enquote{other} category, yet the option is available to surveyors when categorizing sounds manually.   
-The sounds and the corresponding synthesizer programs are saved to hard-disk. Here we assess the success rate of two different pipelines---and by extension, the virtual ears---by manual inspection of sounds categorized as drums, as well as the category of those drums. Both authors categorized a subset of the results without knowledge of the drum categorization outcomes. Additionally, each responder had the option of labeling samples as \enquote{bad} for samples that they deemed not percussive.  The percentage of sounds labeled as \enquote{bad} by the authors is a measurement of success with regards to \hypref{Decision.1}. We measure success with regards to \hypref{Decision.2}---the reliability of agreement between persons and drum categorization models--- via the Fleiss' kappa coefficient \cite{fleiss1971measuring}. The value of 0 or less for this coefficient indicates no agreement beyond random chance, and the values of 1 indicates perfect agreement. We again measure this coefficient after dropping samples that were categorized as \enquote{bad} by one or both authors. We also show measurements after dropping all \enquote{bad} and \enquote{other} samples.
-
-
+We assess the success rate of each pipeline---and by extension, the virtual ears---by manual inspection of sounds categorized as drums. Both authors categorized a subset of the results without knowledge of the assigned labels. Additionally, each responder has the option of labeling samples as \enquote{bad} for samples that they deemed not percussive.  The percentage of sounds labeled as \enquote{bad} by the authors is a measurement of success with regards to \hypref{Decision.1}. We measure success with regards to \hypref{Decision.2}---the reliability of agreement between persons and drum categorization models---via the Fleiss' kappa coefficient \cite{fleiss1971measuring}. The value of 0 or less for this coefficient indicates no agreement beyond random chance, and the values of 1 indicates perfect agreement. We again measure this coefficient after dropping samples that were categorized as \enquote{bad} by one or both authors. We also show measurements after dropping all \enquote{bad} and \enquote{other} samples.
 \subsection{Survey Discussion}
 \label{survey2_takeaway}
-Due to the discrepancy in categorization and output groups, results from the two surveys must be compared with caution. Agree-ability scores for MEM pipeline are often lower, but we reiterate that the MEM survey has two out of six (rather than one out of six in the TPE pipeline) categories which are exclusive to survey responders. Supporting this hypothesis is the notable improvement in agree-ability observed after dropping all \enquote{bad} and \enquote{other} samples. Despite the drawbacks, the MEM pipeline remains competitive while working with a fraction of the features to learn from and simultaneously making both decisions. Suggesting that latent representations of autoencoder networks can be used as general, low-dimensional proxies for representation of complex inputs.  
+Due to the discrepancy in categorization and output groups, results from the two surveys must be compared with caution. Agree-ability scores for MEM pipeline are often lower, but we reiterate that the MEM survey has two out of six (rather than one out of six in the TPE pipeline) categories which are exclusive to survey responders. Supporting this hypothesis is the notable improvement in agree-ability observed after dropping all \enquote{bad} and \enquote{other} samples. Despite the drawbacks, the MEM pipeline remains competitive while working with a fraction of the features to learn from and simultaneously making both decisions. Suggesting that latent representations of autoencoder networks can be used as general, low-dimensional proxies for representation of complex inputs.
+
+\section{Conclusion and Future Work}
 \bibliographystyle{apacite}
 \bibliography{CSMC_MUME_LaTeX_Template.bib}
 
 
 \begin{appendices}
 \chapter{Datasets}
-\label{appendix:A}
-\begin{table}[h!]
+\label{appendix:datasets}
+Our data sources are a large set of 2 second or shorter drum samples aggregated from personal libraries, free drum kits from the sample-swap project \footnote{https://sampleswap.org/} which we organized into 5 groups, and a large set of drum sounds aggregated from royalty free sources such as musicradar \footnote{https://www.musicradar.com/}. We put together 3 databases of drums using these sources. We also created a database of synthetic noise from 1, 3, and 5 stacked virtual synthesizers. Specifications about our datasets can be found in tables~\ref{db:self},~\ref{db:radar},~\ref{db:sampleswap} and~\ref{db:noise}. We have made our dataset of free-drum sounds available for download. The scripts used to download and process royalty free samples are also made available. Further information about downloading our dataset can be found on the project's github page. 
+
+We prioritize making generalizable tools which can learn from and produce a variety of different sounds. We utilize these databases depending on the task at hand. At times, we merged or purged drum groups to simplify tasks.
+\begin{table}[]
 \centering
 \begin{tabular}[width=\paperwidth]{|l|l|l|l|l|l|l|l|l|l|}
 \hline
@@ -237,7 +224,7 @@ MixedDB & 648 & 732 & 118 & 179 & 139 &  188 & 187 & 280 & 105 \\\hline
 \label{db:self}
 \end{table}
 
-\begin{table}[h!]
+\begin{table}[]
 \centering
 \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
 \hline
@@ -248,7 +235,7 @@ RadarDB & 1054 & 842   & 353 & 349 &  353 & 1561& 131 & 121 \\ \hline
 \label{db:radar}
 \end{table}
 
-\begin{table}[h!]
+\begin{table}[]
 \centering
 \begin{tabular}{|l|l|l|l|l|l|}
 \hline
@@ -260,7 +247,7 @@ RadarDB & 1054 & 842   & 353 & 349 &  353 & 1561& 131 & 121 \\ \hline
 \end{table}
 
 
-\begin{table}[h!]
+\begin{table}[]
 \centering
 \begin{tabular}{|l|l|l|l|}
 \hline
@@ -273,7 +260,7 @@ RadarDB & 1054 & 842   & 353 & 349 &  353 & 1561& 131 & 121 \\ \hline
 
 %=============
 \chapter{Audio Transformation Functions}
-\label{appendix:B}
+\label{appendix:trans_funcitons}
 \begin{figure}
 \centering
 \textbf{Visual Representation of Raw Features}\par\medskip
@@ -293,7 +280,7 @@ RadarDB & 1054 & 842   & 353 & 349 &  353 & 1561& 131 & 121 \\ \hline
 
 %================
 \chapter{Virtual Ear Classifier Definitions}
-\label{appendix:C}
+\label{appendix:classifier_definitions}
 \section{Two Phased models}
 Using the described features, we trained several neural network models for Phase 1 and 2 in the Pytorch environment. The task of Phase 1 is to separate drums from not-drums (DrumVsNotDrum, or DVN). The task of Phase 2 is to categorize drums and percussion (DrumVsDrum, or DVD). We kept our feature space small, making it viable for feature selection and model design to be done on a trial and error basis. For all models, accuracy is calculated by prediction of all test dataset labels and the loss function and optimizer are Categorical-CrossEntropy and Adam respectively. Training continues until no reduction in loss and accuracy is observed in 10 epochs.  All activation functions are PReLU:
 \begin {enumerate}

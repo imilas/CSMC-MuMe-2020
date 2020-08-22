@@ -52,11 +52,19 @@
 \title{Percussion program generation and filtering with Virtual Listeners}
 \title{Filtering generated percussion programs with Virtual Listeners}
 \title{Listen to it: Generating and filtering synthesizers by percussive qualities}
-\title{VirtuaListen to it: Generating and filtering synthesizers by percussive qualities}
+\title{Virtual Listeners that filter percussion synthesizers}
+\title{Generating Drum synthesizers with virtual listeners}
+\title{Make your own audience, virtual listeners can filter generated drum programs}
+\title{Using AI to filter through millions of synthesizer programs to find some drums}
+\title{Finding the drum in the haystack: Using AI Listeners to filter through millions of generated drums}
+\title{Program Generation and AI listeners to search for drum synthesizers}
+\title{Intersecting AI listener and program generation to find drum synthesizers}
+\title{Percussive Synthesizer Program Generation via AI Listening}
+\title{Make Your Own Audience, Virtual Listeners Can Filter Generated Drum Programs}
 
 
 % a short form should be given in case it is too long for the running head
-\titlerunning{Percussive Synth. Generation}
+\titlerunning{Make Your Audience}
 
 % the name(s) of the author(s) follow(s) next
 \author{Amir Salimi \and Abram Hindle}
@@ -89,7 +97,8 @@ To facilitate future research, we share our curated dataset of free percussive s
 
 \section{Introduction} 
 Digital recordings of novel, one-shot\footnote{A single hit on the drum that captures its capabilities} drum sounds are commonly used in  electronic music compositions. Yet unique drum sounds can be difficult or expensive to find. By relying on recordings of \textit{real life} drum sounds, artists are limited by what instruments exist in the real world and whether or not high-quality, one-shot recordings can be accessed. We believe automatic programming of virtual synthesizers for the creation of novel drum sounds can alleviate these material limitations. To this end, we implement a programmable virtual synthesizer of audio, which we call the \emph{virtual synthesizer}. We also implement machine learning classifiers for automatic separation of percussive sounds from non-percussive sounds. To effectively train the classifiers with small datasets, we simplify the representation of audio data by experimenting with fast Fourier transform (FFT) features and autoencoder embeddings. We call our system of feature extraction and classification of sounds the \emph{virtual ear}. To create a dataset of synthetic drums, the virtual synthesizer produces random programs and generates the corresponding audio. This audio is then categorized by the virtual ear. We save not just the desirable sounds, but also the programs which generated these sounds. These programs can be modified and experimented on by sound designers, or used for an improved search algorithm in future works. We build generative systems using different implementations of the virtual ear, and conduct manual hearing tests of the generated sounds. Our results are promising as the majority of sounds generated from our systems are deemed percussive by human listeners. However, we cannot quantify the novelty of these sounds. 
-
+\section{Datasets}
+We curated 3 databases of one-shot drums which we can use to train drum classifiers. \textbf{FreeDB} contains 5 categories: kicks, snares, claps, hats and other(various percussions). \textbf{RadarDB} contains 7 categories: kicks, snares, claps, hats, shakers, toms and rims. \textbf{MixedDB} contains 8 categories: kicks, snares, claps, high toms, low toms, medium toms, closed hats and open hats. See Appendix~\ref{appendix:datasets} for details and download links.   
  \begin{figure}[tbp]
     \begin{center}
     % \textbf{Generative System}
@@ -154,7 +163,7 @@ Filter Order & 4,8,16 & butterworth filter order \\
 
 \section{Virtual Ear}
 \label{section:virtual_ear}
-The virtual ear receives sounds and discards those which do not resemble drums. It then classifies sounds by drum category. Our goal is not realism; We want the virtual ear to accept novel and unusual drum sounds. The virtual ear makes two critical decisions: 
+The virtual ear receives sounds and discards those which do not resemble drums. It then classifies sounds by drum category. Our goal is to produce a virtual ear that accurately discriminates between percussive and non-percussive sounds, but is tolerant of novelty. The virtual ear makes two critical decisions: 
 \emph{
 \begin{quote}
 \text{Decision.1 Could the sound be used as a drum?}
@@ -162,8 +171,7 @@ The virtual ear receives sounds and discards those which do not resemble drums. 
 \text{Decision.2 If it does sound like a drum, what type of drum should it be?}
 \end{quote}
  }
- 
-\begin{figure}[tbp]
+ \begin{figure}[tbp]
     \begin{center}
     \makebox[\textwidth]{\includegraphics[width=0.95\linewidth]{images/venn_data.pdf}}
     \end{center}
@@ -171,9 +179,24 @@ The virtual ear receives sounds and discards those which do not resemble drums. 
     }
 \label{fig:ven_data}
 \end{figure}
-\descfirst requires knowledge of what drums \textbf{do not} sound like, or knowledge of an infinitely large set, which cannot be fully represented via examples. An important consideration is that the source of sounds used in training the model (organic drum sounds) will be fundamentally different from the source of unlabeled sounds we wish to categorize (noise from a synthesizer). This issue is reflective of the open set recognition (OSR) problem~\cite{geng2020recent,mundt2019open}. We use figure~\ref{fig:ven_data} to highlight a number of caveats with our training approach: We denote $\mathcal{N}$ as the set of percussive sounds a synthesizer is capable of making. $\mathcal{T^{+}}$, our positive examples, is a set of one-shot drum sounds (see Appendix~\ref{appendix:datasets} for details about our datasets). During the hearing test, the virtual ear continually receives synthesizer noises for classification. The set of received noises is denoted as $\mathcal{H}$. The performance of the ear is measured by its precision and recall in finding the overlap between $\mathcal{H}$ and $\mathcal{N}$. It is important to ensure that the change in domains---particularly with the case of positive examples of percussive sounds---does not interfere with transformation of knowledge from the training of the ear to the hearing test. To maximize the transference of knowledge from one domain to another, we seek to learn from agnostic feature sets that capture fundamental characteristics of the data points.
-\subsection{Feature Extraction}
-Various works have demonstrated effective reconstruction of signals given their Short-time Fourier Transforms (STFT)~\cite{nawab1983signal,griffin1984signal}. If the STFT of a signal can be used for its reconstruction, perhaps it can be utilized as a source of fundamental features. We defined 3 STFT transformation functions which we believe to capture important, unique attributes of percussive sounds. 
+\descfirst requires knowledge of what drums \textbf{do not} sound like, or knowledge of an infinitely large set, which cannot be fully represented via examples. An important consideration is that the source of sounds used in training the model (organic drum sounds) will be fundamentally different from the source of unlabeled sounds we wish to categorize (noise from a synthesizer). This issue is reflective of the open set recognition (OSR) problem~\cite{geng2020recent,mundt2019open}. We use Figure~\ref{fig:ven_data} to highlight a number of caveats with our training approach. If the sound is deemed percussive, the virtual ear makes \descsecond~by finding the best drum category for the sound. The number of categories available is dependent on the database of drums used for training. 
+To maximize the transference of knowledge from training the classifiers to evaluation of programs, we need to extract concise feature sets that capture fundamental characteristics of the data points.\\
+In order to classify sounds, we need to summarize them as features. Various works have demonstrated effective reconstruction of signals given their Short-time Fourier Transforms (STFT)~\cite{nawab1983signal,griffin1984signal}. If the STFT of a signal can be used for its reconstruction, perhaps it can be utilized as a source of fundamental features. We defined 3 STFT transformation functions which we believe to capture important, unique attributes of percussive sounds. 
+
+\begin{enumerate}
+\item Envelope Transformation: Represents changes in loudness for the duration of the signal. Using STFT we generate a matrix $M_{i \times j}$ with rows $i$ and columns $j$ corresponding to time steps and frequency bins. Values $v_{i \times j}$ indicate the magnitude of the frequency bin $j$ at each time-step $i$. We approximate the envelope of the signal by summing the values of $M$ for at time-step (or row $i$). 
+\item Frequency Transformation:  The calculation of this feature vector is similar to the envelope, but the summation is done along the frequency axis. Shorter hop-sizes and wider windows were used to increase frequency resolution. 
+\item Spectrum Transformation: Mel Scaled STFT with its values normalized from 0-1. 
+\end{enumerate}
+Another set of features were extracted using the latent embeddings of autoencoder networks. We trained a number of autoencoders for the task of encoding and decoding spectrogram transformation of drum sounds, and used decoding loss to measure their performance (see Appendix~\ref{appendix:hyperparam}). Latent embeddings at the bottleneck layer of our best spectrogram autoencoder are used as features for sound categorization.  As a sanity check for this approach, we trained our best autoencoder using 80\% of the drums in MixedDB. Latent encodings of the remaining 20\% and 1000 Noise sounds were projected onto a 2 or 3-dimensional planes using t-SNE. We implemented interactions for our projection graphs (see Appendix~\ref{appendix:tsne}) so the sounds associated with plot points can be listened to. Hearing tests revealed a noticeable, positive correlation between a synthetic sound's distance and similarity to drum clusters.
+
+Two groups of synthetic ears are implemented: \emph{two phased ears} (TPEs) and \emph{Mixed Ear Models} (MEMs). 
+
+TPEs combine different stand-alone models specializing in~\descfirst or~\descsecond~and are trained only with our FFT features. To train TPEs for \descfirst, we use all drums in RadarDB and FreeDB (categories do not matter). For the~\descsecond, we combine the two databases and merge toms into kicks. Rims and shakers are merged with FreeDB's \enquote{other} category. MEMs are trained with autoencoder embeddings and envelope features and give simultaneous answers to both decisions. MEMs are trained with with the kicks, snares, claps and hat sounds from RadarDB and FreeDB.
+
+
+%  Our best TPE models achieve 82\% accuracy in a 6-way drum categorization task and 98\% accuracy in separation of drums from non-drum sounds. Our best MEM achieves 91\% accuracy in a 4 way drum categorization task and 99\% accuracy in separation of drums from non-drums. Detailed measurements can be found in Appendix~\ref{appendix:classifier_definitions}. 
+
 \begin{figure}[tbp]
 \begin{center}
 % \textbf{Visual Representation of FFT Features}\par\medskip
@@ -182,16 +205,6 @@ Various works have demonstrated effective reconstruction of signals given their 
 \label{fig:stackspectrums}
     \end{center}
 \end{figure}
-\begin{enumerate}
-\item Envelope Transformation: Represents changes in loudness for the duration of the signal. Using STFT we generate a matrix $M_{i \times j}$ with rows $i$ and columns $j$ corresponding to time steps and frequency bins. Values $v_{i \times j}$ indicate the magnitude of the frequency bin $j$ at each time-step $i$. We approximate the envelope of the signal by summing the values of $M$ for at time-step (or row $i$). 
-\item Frequency Transformation:  The calculation of this feature vector is similar to the envelope, but the summation is done along the frequency axis. Shorter hop-sizes and wider windows were used to increase frequency resolution. 
-\item Spectrum Transformation: Mel Scaled STFT with its values normalized from 0-1. 
-\end{enumerate}
-% Our transformations are GPU based, allowing their application in tandem with the training of the classifier or tuning of STFT transformation during hyper-paramter optimization (see Appendix~\ref{appendix:hyperparam}).
-Another set of features were extracted using the latent embeddings of autoencoder networks. We trained a number of autoencoders for the task of encoding and decoding spectrogram transformation of drum sounds, and used decoding loss to measure their performance (see appendix~\ref{appendix:hyperparam}). Latent embeddings at the bottleneck layer of our best spectrogram autoencoder are used as features for sound categorization.  As a sanity check for this approach, we trained our best autoencoder using 80\% of the drums in MixedDB. Latent encodings of the remaining 20\% and 1000 Noise sounds were projected onto a 2 or 3-dimensional planes using t-SNE. We implemented interactions for our projection graphs (see Appendix~\ref{appendix:tsne}) so the sounds associated with plot points can be listened to. Hearing tests revealed a noticeable, positive correlation between a synthetic sound's distance and similarity to drum clusters.
-\subsection{Ear Types}
-\label{classifiers}
-Two groups of synthetic ears are implemented: \emph{two phased ears} (TPEs) and \emph{Mixed Ear Models} (MEMs). TPEs combine different models specializing in ~\descfirst or ~\descsecond~ and are trained only with our FFT features. MEMs are trained with autoencoder embeddings and envelope features and give simultaneous answers to both questions. Our best TPE models achieve 82\% accuracy in a 6-way drum categorization task and 98\% accuracy in separation of drums from non-drum sounds. Our best MEM achieves 91\% accuracy in a 4 way drum categorization task and 99\% accuracy in separation of drums from non-drums. Further specifications and detailed measurements for TPE and MEMs can be found in Appendix~\ref{appendix:classifier_definitions}. 
 \section{Pipelines and Surveys}
 \label{surveys}
 
@@ -424,7 +437,7 @@ Using our encoding and envelope features to represent audio, five classification
 \end{figure}
 
 We're also interested in how these models perform on the binary drum vs not drum task.
-After grouping all drums together, we repeat the model selection process above. We also repeat the hyper-parameter optimization step where no changes appeared necessary except for a reduction in the number of neighbors for the K-Neighbor model (from 30 to 5). As show in in figures~\ref{fig:f1_allg_box} and~\ref{fig:f1_dvn_box}, the addition of envelope features had a positive effect on performance for all mdoels, yet the RandomForest and ExtraTrees models clearly outperform the other classifiers in both tasks. We train the top two models on \%80 of our database and use the remaining \%20 to create the confusion matrices and the F-Scores shown in figures~\ref{fig:conf_f1_dvn}.
+After grouping all drums together, we repeat the model selection process above. We also repeat the hyper-parameter optimization step where no changes appeared necessary except for a reduction in the number of neighbors for the K-Neighbor model (from 30 to 5). As show in in Figures~\ref{fig:f1_allg_box} and~\ref{fig:f1_dvn_box}, the addition of envelope features had a positive effect on performance for all mdoels, yet the RandomForest and ExtraTrees models clearly outperform the other classifiers in both tasks. We train the top two models on \%80 of our database and use the remaining \%20 to create the confusion matrices and the F-Scores shown in Figures~\ref{fig:conf_f1_dvn}.
 \begin{figure}[h!]   
     \begin{center}
         \textbf{Cross Validation F-Scores For Drum Vs Not-Drum}

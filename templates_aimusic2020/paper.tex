@@ -33,6 +33,7 @@
 \usepackage{comment}
 \usepackage{multirow}
 \usepackage[T1]{fontenc}
+\usepackage[bottom]{footmisc}
 \newcommand{\keywords}[1]{\par\addvspace\baselineskip
 \noindent\keywordname\enspace\ignorespaces#1}
 
@@ -97,9 +98,9 @@ To facilitate future research, we share our curated dataset of free percussive s
 
 
 \section{Introduction} 
-Digital recordings of novel, one-shot\footnote{A single hit on the drum that captures its capabilities} drum sounds are commonly used in  electronic music compositions. Yet unique drum sounds can be difficult or expensive to find. By relying on recordings of material drum sounds, artists are limited by what instruments exist in the material world and whether or not high-quality, one-shot recordings can be accessed. We believe automatic programming of virtual synthesizers for the creation of novel drum sounds can alleviate these limitations. To this end, we implement a programmable virtual synthesizer of audio, which we call the \emph{virtual synthesizer}. We also implement machine learning classifiers for automatic separation of percussive sounds from non-percussive sounds. To effectively train the classifiers with small datasets, we simplify the representation of audio data by experimenting with fast Fourier transform (FFT) features and autoencoder embeddings. We call our system of feature extraction and classification of sounds the \emph{virtual ear}. To create a dataset of synthetic drums, the virtual synthesizer produces random programs and generates the corresponding audio. This audio is then categorized by the virtual ear. We save not just the desirable sounds, but also the programs which generated these sounds. These programs can be modified and experimented on by sound designers, or used for an improved search algorithm in future works. We build generative systems using different implementations of the virtual ear, and conduct manual hearing tests of the generated sounds. Our results are promising as the majority of sounds generated from our systems are deemed percussive by human listeners. However, we cannot quantify the novelty of these sounds. 
-\section{Datasets}
-We curated 3 databases of one-shot drums which we use to train drum classifiers. \textbf{FreeDB} contains 5 categories: kicks, snares, claps, hats and other (various percussions). \textbf{RadarDB} contains 7 categories: kicks, snares, claps, hats, shakers, toms and rims. \textbf{MixedDB} contains 8 categories: kicks, snares, claps, high toms, low toms, medium toms, closed hats and open hats. See Appendix~\ref{appendix:datasets} for details and download links.   
+Digital recordings of novel, one-shot\footnote{A single hit on the drum that captures its capabilities} drum sounds are commonly used in  electronic music compositions. Yet unique drum sounds can be difficult or expensive to find. By relying on recordings of material drum sounds, artists are limited by what instruments exist in the material world and whether or not high-quality, one-shot recordings can be accessed. We believe automatic programming of virtual synthesizers for the creation of novel drum sounds can alleviate these limitations. To this end, we implement a programmable virtual synthesizer of audio, which we call the \emph{virtual synthesizer}. We also implement machine learning classifiers for automatic separation of percussive sounds from non-percussive sounds. To effectively train the classifiers with small datasets, we simplify the representation of audio data by experimenting with fast Fourier transforms (FFT) and autoencoder embeddings. We call our system of feature extraction and classification of sounds the \emph{virtual ear}. To create a dataset of synthetic drums, the virtual synthesizer produces random programs and generates the corresponding audio. This audio is then categorized by the virtual ear. We save not just the desirable sounds, but also the programs which generated these sounds. These programs can be modified and experimented on by sound designers. In this work, only random search is used for program generation, but other heuristics can be integrated for an improved search algorithm in future works. We build generative systems using different implementations of the virtual ear, and conduct manual hearing tests of the generated sounds. Our results are promising as the majority of sounds generated from our systems are deemed percussive by human listeners. However, we cannot quantify the novelty of these sounds. 
+
+We curated 3 data-sets of one-shot drums which we use to train drum classifiers. \textbf{FreeDB} contains 5 categories: kicks, snares, claps, hats and other (various percussions). \textbf{RadarDB} contains 7 categories: kicks, snares, claps, hats, shakers, toms and rims. \textbf{MixedDB} contains 8 categories: kicks, snares, claps, high toms, low toms, medium toms, closed hats and open hats. See Appendix~\ref{appendix:datasets} for details and download links.   
  \begin{figure}[tbp]
     \begin{center}
     % \textbf{Generative System}
@@ -140,7 +141,7 @@ Filter Order & 4,8,16 & butterworth filter order \\
 \label{table:submodule_params}
 \end{table}
 To create sounds, we build digital synthesizers. We use classical DSP to build our synthesizer, which allows for quick, offline, and parallel generation of audio signals without the usage of GPUs. We made extensive use of Pippi\footnote{https://github.com/luvsound/pippi} and SciPy~\cite{jones2001scipy} libraries. Our virtual synthesizer contains a set of one or more submodules. Each submodule is a self-contained noise making unit and creates signals by taking the steps depicted in figure~\ref{fig:submodule}. Submodules have identical sets of parameters, but widely different outputs can be achieved depending on the values assigned. The set of required parameters for each submodule is highlighted in Table~\ref{table:submodule_params}. The sonic output of the virtual synthesizer is the normalized addition of the output of its submodules. Our implementation of a synthesizer can have any number of submodules. We call the number of submodules in each virtual synthesizer the \textit{stack size}. We call the sets of parameter values that characterize a synthesizer's submodules a \textit{program} (analogous to presets and submodules for a VST).  
- \begin{figure}[tbp]
+ \begin{figure}[pb]
     \begin{center}
     % \textbf{Synthesizer SubModule }
     \makebox[\textwidth]{
@@ -156,7 +157,7 @@ To create sounds, we build digital synthesizers. We use classical DSP to build o
     \item \textit{Novelty and Creativity}: The goal here is to work with the limitations of any tractable sound source to create its approximations of a given sound category. We seek to create novel sounds via artificial, exploratory creativity. Boden defines this concept as an emergent property of generative work within confined rule sets~\cite{boden2009computer}. An example is the perpetual popularity of 8-bit aesthetics~\cite{collins2007loop}. 
     \item \textit{Interpretability}: Neural networks are often described as black boxes with uninterruptible weights~\cite{basheer2000artificial}. Their highly recursive structure makes modern explanation methods such as saliency maps unreliable~\cite{rudin2019stop}.  
     \item \textit{Speed of Rendering}: Neural network synthesis is costly; Sub 24 khz sample rates are common in most relevant works~\cite{yamamoto2020parallel,oord2017parallel,aouameur2019neural,ramires2020neural}. This is far below CD quality sampling rates~\cite{reiss2016meta}. At our fixed sampling rate of 48 khz, synthesizers with 8 submodules can create and save 1 second sounds to hard-disk with an average rendering time of 50 milliseconds\footnote{Using a single process on a Macbook Air 2012 and Ubuntu 18.04}. 
-    \item \textit{Flexibility and Scaling}: Probabilistic audio generation is often done sequentially. State of the art, parallel wave generation with GANs requires a fixed amount for rendering time for each time-step~\cite{yamamoto2020parallel}. Our virtual synthesizer produces audio by solving a linear system of equations. The added footprint of increasing the length of rendered sounds or higher sampling rates is relatively minuscule.  
+    \item \textit{Flexibility and Scaling}: Probabilistic audio generation is often done sequentially. State of the art, parallel wave generation with GANs requires a fixed amount for rendering time for each time-step~\cite{yamamoto2020parallel}. With our virtual synthesizer, the added footprint of increasing the length of rendered sounds or higher sampling rates is relatively minuscule.  
 \end{enumerate*}
 
 %  Evaluation of a periodic function such as sine or cosine is the simplest form of software audio generation~\cite{mitchell2009basicsynthChap5}. This generative system is called an \textit{oscillator}. With careful programming, DSP techniques can be used to replicate almost any sound~\cite{jenkins2019analog}. Synthesizers we build using these functions are tractable and explainable: the output is determined by the input and reproducible. This makes the evaluation of a set of inputs (or parameters) to our synthesizers relatively simple.
@@ -172,7 +173,7 @@ The virtual ear receives sounds and discards those which do not resemble drums. 
 \text{Decision.2 If it does sound like a drum, what type of drum should it be?}
 \end{quote}
  }
- \begin{figure}[tbp]
+ \begin{figure}[bh]
     \begin{center}
     \makebox[\textwidth]{\includegraphics[width=0.95\linewidth]{images/venn_data.pdf}}
     \end{center}
@@ -284,7 +285,6 @@ RadarDB & 1054 & 842   & 353 & 349 &  353 & 1561& 131 & 121 \\ \hline
 \caption{Database 3: Free sounds sourced from the \enquote{Sample Swap} project. Simplified for our purposes. The version available for download contains more sample groups. The \enquote{other} category contains a variety of percussive sounds.}
 \label{db:sampleswap}
 \end{table}
-
 
 \begin{table}[]
 \centering

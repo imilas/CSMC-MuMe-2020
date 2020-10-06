@@ -1,0 +1,191 @@
+----------------------- REVIEW 1 ---------------------
+SUBMISSION: 50
+TITLE: Make Your Own Audience: Virtual Listeners Can Filter Generated Drum Programs
+AUTHORS: Amir Salimi and Abram Hindle
+
+----------- Overall evaluation -----------
+SCORE: 2 (accept)
+----- TEXT:
+Make Your Own Audience: Virtual Listeners Can Filter Generated Drum Programs
+
+Amir Salimi and Abram Hindle
+
+Full paper
+
+
+Overall evaluation. 2: accept
+Reviewer's confidence. 5: expert
+
+
+SUMMARY
+
+This is a very nice paper. It trains a classifier to distinguish between drums and not-drums (and also to classify drum sounds into several categories). It then uses a parametric synthesizer to generate audio, and uses the classifier to discard the non-drums and classify the drums into categories for later musical use. There are also listening tests to validate that the system works (though I understand they are informal, done in a blinded way by the authors rather than third-party subjects). The paper also *promises* heuristic search, but I think it is actually left for future work.
+
+There is a substantial body of work here -- several components, lots of computational experiments, and listening tests. In fact, there is much more than the authors were able to fit into the page limit. I decided to read the paper and ignore the appendices, for fairness.
+
+There are still quite a few possible improvements, but overall I think it is very nice and should be accepted.
+
+
+
+LITERATURE
+
+> In early 2000s, Interactive Genetic Algorithms (IGA’s) were utilized for the gen- eration of new sounds with various sound-engines (Johnson, 1999; Dahlstedt, 2001).
+
+Perhaps the early work using GAs for non-interactive sound matching is more relevant.
+
+@ARTICLE{horner:beauchamp:haken,
+AUTHOR="Andrew Horner and James Beauchamp and Lippold Haken",
+TITLE="Machine Tongues {XVI}: Genetic Algorithms and their Application
+  to {FM} Matching Synthesis",
+JOURNAL="Computer Music Journal",
+YEAR="1993",
+VOLUME="17",
+NUMBER="4",
+PUBLISHER="MIT Press",
+PAGES="17-29"
+}
+
+@inproceedings{macret2012automatic,
+  title={Automatic calibration of modified fm synthesis to harmonic sounds using genetic algorithms},
+  author={Macret, Matthieu and Pasquier, Philippe and Smyth, Tamara},
+  booktitle={Proceedings of the 9th Sound and Music Computing Conference},
+  address={Copenhagen, Denmark},
+  year={2012}
+}
+
+> Novelty and Creativity: Given large sets of examples, generative models such as VAEs and GANS have proven capable of generating samples similar to the exemplars. In this work, we are not aiming for perfect imitations. We seek to create novel sounds by via artificial, exploratory creativity.
+
+In fairness, VAEs and GANs are capable of generating samples which differ in creative ways too.
+
+> If the STFT of a signal can be used for its reconstruction, perhaps it can be utilized as a source of fundamental features.
+
+Yes, of course, and it is common. The authors should mention some of the many papers which have used STFT as a source of features for machine learning tasks such as classification. Currently the paper gives the impression that the authors have invented this idea with a novel justification.
+
+
+
+
+
+
+
+SYNTHESIZER
+
+> Our virtual synthesizer produces audio by solving a linear system of equations.
+
+I think this is not correct. I understand that the synthesizer is the sum of 1 or more of Fig 2. All of the elements in Fig 2 seem to be implementable as straightforward oscillators and signal-processing transforms. This doesn't involve solving equations. I think perhaps the authors have confused assignment eg "x = Osc()" with solving an equation.
+
+> range of C0(16.35hz) to B9
+
+Not clear why drum sounds should use a diatonic note as a source.
+
+> Amplitude
+
+I guess this parameter is irrelevant, since "The sonic output of the virtual synthesizer is the normalized addition of the output of its submodules."
+
+> LP filter Cuttoff 20000-HP never lower than HP cutoff
+
+I think this should be "20Hz-HP"? It will never be above 20000.
+
+In Fig 2, should "Noise = True" and "Noise = False" be swapped? Is there some other noise source when not using the Noise Cloud?
+
+> To learn “not-drums”, TPEs are given 6000 examples of synthesized noise.
+
+This seems strange to me. I'm not sure how the noise was synthesized. Does this just mean white noise? White noise is not too dissimilar to an old-style drum machine cymbal! I would expect that type of noise (however synthesized) represents a very narrow range of possibilities, relative to all the other types of sounds that the classifier needs to be able to classify. Or perhaps it is random generation of parameters for the synthesizer? Then it begs the question, as the synthesizer is capable of generating both drums and non-drums.
+
+
+
+
+
+
+
+
+SEARCH ALGORITHM
+
+> This implementation also allows for easy integration of heuristic search for future works.
+
+I guess this implies that there is no heuristic search in this paper -- perhaps just random search? This was not clear to me. The abstract and other parts are quite misleading in that case. If there *is* heuristic search, it is not described at all and this is a big weakness.
+
+
+
+
+
+
+
+
+
+
+WRITING
+
+> Make Your Own Audience: Virtual Listeners Can Filter Generated Drum Programs
+
+I think this title is bad, as a member of an audience is different from a listener (human or otherwise) who has a classification task. The latter is a worker, not a member of an audience.
+
+> Additionally, each responder has the option of labeling samples as “bad” for samples that they deemed not percussive.
+
+Bad terminology. "bad" just means "not-drums" as used p6. Try to avoid making the reader remember multiple terms for the same thing. I think there are another couple of examples of this in the same section.
+
+> Perfect detection of drums vs not-drums would create a system which generates nothing.
+
+I don't understand. I guess the authors mean that if the classifier perfectly classified just the drums examples in the dataset, and classified everything else as not-drums, then we would never get new ones. But that is not the same as saying "perfect detection of drums vs not-drums", because it introduces an asymmetry -- (novel drums being classified as not-drums), but not (novel not-drums being classified as drums). Classifiers don't work that way. Another angle on this is just to understand that the goal is to avoid over-fitting, as in all machine learning.
+
+> The percentage of sounds labeled as “bad” by the authors is a measurement of success with regards to Decision.1.
+
+I think this was blinded, but not stated as such. Possibly the high-level experimental design needs to be stated first to establish the validity.
+
+> Esling et al. used over 10,000 a VST synthesizer’s presets
+
+used over 10,000 VST synthesizer presets
+
+> There are 1015 unique programs are possible.
+
+Delete "There are"
+
+Cuttoff -> Cutoff
+
+> https://github.com/imilas/Synths_Stacks_Search
+
+The link in Appendix A doesn't work, as the underscores disappear.
+
+
+
+----------------------- REVIEW 2 ---------------------
+SUBMISSION: 50
+TITLE: Make Your Own Audience: Virtual Listeners Can Filter Generated Drum Programs
+AUTHORS: Amir Salimi and Abram Hindle
+
+----------- Overall evaluation -----------
+SCORE: 1 (weak accept)
+----- TEXT:
+A very innovative project.
+
+The paper is well written and generally well organised.
+
+The use of the neural network to classify generated sound is well presented.
+
+However, for the synth structure, there are plenty of questions. For example, in Fig 2, what is the type of OSC? And for what reason is this structure chosen for the submodule? I would suggest the authors give a clearer description of this part.
+
+Also, in the revised version, I would suggest that the authors provide more sound examples. Otherwise, it would be hard to tell whether the result is convincing.
+
+The length seems to exceed the limitation of the conference, so please keep that in mind during the revision.
+
+
+
+----------------------- REVIEW 3 ---------------------
+SUBMISSION: 50
+TITLE: Make Your Own Audience: Virtual Listeners Can Filter Generated Drum Programs
+AUTHORS: Amir Salimi and Abram Hindle
+
+----------- Overall evaluation -----------
+SCORE: -3 (strong reject)
+----- TEXT:
+- The paper describes an innovative approach to the synthesis of drum sounds, along with collecting of generating methods.
+- However, the paper cannot be understood without the detail in the large appendices (17 pages). I encourage the authors to reshape the current draft to a proper conference contribution, because the core of the method and its application are very interesting. However, in the current state I cannot recommend to accept this paper.
+- Specific comments focusing on the main text body:
+- Section 2 mentions generated datasets, but the explanation of the data is provided in the Appendix, which is not appropriate. Essential explanations of data, method, and results must be provided in the main paper.
+- Table 1 should be placed on the same page with its first reference in the text.
+- "To create sounds, we need digital synthesizers.": This is not a correct statement, but rather a choice within your method.
+- Choices for various parameters of your synthesizer are not motivated, e.g. why restricting to the addition of modules and excluding multiplication. Also the basic structure of the submodule is not explained in the text. The choices you made here constrain the diversity of possible sounds.
+- Motivations for using such a restricted set of parameters are convincingly provided on page 4.
+- Page 6 presents three computations based on a STFT magnitude. First you refer to them as transformations, and then - after the list - as features. It remains unclear to me how you use e.g. the mel-frequency magnitide spectrogram as a feature (again, some further information seems to be provided in the appendices).
+- You make use of additional features obtained from autoencoders. How these are obtained is once more explained in an appendix only, which is not appropriate for a central part of the applied method.
+- It is unclear from the main body of the text what you refer to with the TPE and MEM models. These models are again described in an Appendix (C).
+

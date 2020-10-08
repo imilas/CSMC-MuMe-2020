@@ -160,11 +160,11 @@ Filter Order & 4,8,16 & butterworth filter order \\
 \label{table:submodule_params}
 \end{table}
 To create sounds, we build digital synthesizers. We use classical DSP to build our synthesizer, which allows for quick, offline, and parallel generation of audio signals without the usage of GPUs. We made extensive use of Pippi\footnote{https://github.com/luvsound/pippi} and SciPy~\cite{jones2001scipy} libraries. Our virtual synthesizer contains a set of one or more submodules. Each submodule is a self-contained noise making unit and creates signals by taking the steps depicted in figure~\ref{fig:submodule}. Submodules have identical sets of parameters, but widely different outputs can be achieved depending on the values assigned. The set of required parameters for each submodule is highlighted in Table~\ref{table:submodule_params}. The sonic output of the virtual synthesizer is the normalized addition of the output of its submodules. Our implementation of a synthesizer can have any number of submodules. We call the number of submodules in each virtual synthesizer the \textit{stack size}. We call the sets of parameter values that characterize a synthesizer's submodules a \textit{program} (analogous to presets and submodules for a VST).  
- \begin{figure}[]
+ \begin{figure}[tbp]
     \begin{center}
     % \textbf{Synthesizer SubModule }
     \makebox[\textwidth]{
-    \fbox{\includegraphics[width=1\linewidth]{templates_aimusic2020/images/synthesizer_block.pdf}}}
+    \fbox{\includegraphics[width=1\linewidth]{templates_aimusic2020/images/synthesizer_block_thin.pdf}}}
     \end{center}
     \caption{High level representation of pre-rendering steps for each submodule. Each Synthesizer contains 1 or more these submodules. Synthesizer programs set the number of these submodules and their parameters. The output of a synthesizer is the normalized addition of all its submodule outputs. 
     }
@@ -191,7 +191,7 @@ The virtual ear receives sounds and discards those which do not resemble drums. 
 \text{Decision.2 If it does sound like a drum, what type of drum should it be?}
 \end{quote}
  }
- \begin{figure}[bh]
+ \begin{figure}[]
     \begin{center}
     \makebox[\textwidth]{\includegraphics[width=0.95\linewidth]{images/venn_data.pdf}}
     \end{center}

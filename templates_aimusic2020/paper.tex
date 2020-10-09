@@ -29,7 +29,7 @@
 \usepackage{caption}
 \usepackage{threeparttable} %annotations for table
 \usepackage{csquotes}
-\usepackage{appendix}
+\usepackage[title]{appendix}
 \usepackage{comment}
 \usepackage{multirow}
 \usepackage[T1]{fontenc}
@@ -197,11 +197,11 @@ The virtual ear receives sounds and discards those which do not resemble drums. 
 \decfirst~requires knowledge of what drums \textbf{do not} sound like, or knowledge of an infinitely large set, which cannot be fully represented via examples. An important consideration is that the source of sounds used for training the model (organic drum sounds) will be fundamentally different from the source of unlabeled sounds we wish to categorize (noise from a synthesizer). This issue is reflective of the open set recognition (OSR) problem~\cite{geng2020recent,mundt2019open}. We use Figure~\ref{fig:ven_data} to highlight a number of caveats with our training approach. If the sound is deemed percussive, the virtual ear makes \decsecond~by finding the best drum category for the sound. The number of categories available is dependent on the database of drums used for training. 
 To maximize the transference of knowledge gained from training the classifiers to evaluation of programs, we need to extract concise feature sets that capture fundamental characteristics of the data points.\\
 
-In order to classify sounds, we need to summarize them as features. Various works have demonstrated effective reconstruction of signals given their Short-time Fourier Transforms (STFT)~\cite{nawab1983signal,griffin1984signal}. If the STFT of a signal can be used for its reconstruction, perhaps it can be utilized as a source of fundamental features~\cite{lee2009unsupervised,hershey2017cnn}. We defined 3 STFT (or FFT) transformation functions which we believe to capture important, unique attributes of percussive sounds. 
+In order to classify sounds, we need to summarize them as features. Various works have demonstrated effective reconstruction of signals given their Short-time Fourier Transforms (STFT)~\cite{nawab1983signal,griffin1984signal}. If the STFT of a signal can be used for its reconstruction, perhaps it can be utilized as a source of fundamental features~\cite{lee2009unsupervised,hershey2017cnn}. We defined 3 STFT (or FFT) transformation functions to capture important features of percussive sounds. 
 \begin{enumerate}
 \item Envelope Transformation: Represents changes in loudness for the duration of the signal. Using STFT we generate a matrix $M_{i \times j}$ with rows $i$ and columns $j$ corresponding to time steps and frequency bins. Values $v_{i \times j}$ indicate the magnitude of frequency bin $j$ at each time-step $i$. We approximate the envelope of the signal by summing the values of $M$ at each time-step. 
 \item Frequency Transformation:  Similar to envelope calculation, but the summation is done along the frequency axis. Shorter hop-sizes and wider windows were used to increase frequency resolution. 
-\item Spectrum Transformation: Mel Scaled STFT with values normalized from 0-1. 
+\item Spectrum Transformation: Mel Scaled STFT. Values normalized from 0-1. 
 \end{enumerate}
 
 Another set of features were extracted using the latent embeddings of autoencoder networks. Here, an autoencoder is a combination of an encoder which encodes spectrograms into a lower dimension and a decoder which tries to decode these embeddings into the original data. We trained a number of autoencoders with spectrogram transformations, and used the encoder from the autoencoder network with the lowest decoding loss as a feature extractor~\footnote{Appendix~\ref{appendix:hyperparam} has further details on the hyperparameter search process}. Latent embeddings at the bottleneck layer of our best spectrogram autoencoder are used as features for sound categorization. 
@@ -274,9 +274,12 @@ Manual listening tests revealed much room for improvement, particularly with acc
 
 \bibliographystyle{apacite}
 \bibliography{citations.bib}
+\clearpage
+
 
 \begin{appendices}
-%======================
+\markboth{Appendix}{Appendix}
+
 \chapter{Datasets, Details, and Downloads}
 \label{appendix:datasets}
 \subsection{Download Instructions}
@@ -348,8 +351,8 @@ NoiseDB & 1 Stack:2000 - 3 Stacks:2000 - 5 Stacks:2000                         \
 %==========================
 \chapter{Audio Transformation Functions}
 \label{appendix:trans_funcitons}
-Figure ~\ref{stackspectrums} contains the graphed representation of features extracted for 3 different samples. Sample $a$ is a recorded hat from our database. sample $b$ is an example of randomly generated noise with percussive qualities that we found suitably similar to a snare sound. Sample $c$ is an example of a randomly generated noise where the spectrum features are necessary for proper classification.
-\begin{figure}[h]
+Figure~\ref{fig:stackspectrums} contains the graphed representation of features extracted for 3 different samples. Sample $a$ is a recorded hat from our database. sample $b$ is an example of randomly generated noise with percussive qualities that we found suitably similar to a snare sound. Sample $c$ is an example of a randomly generated noise where the spectrum features are necessary for proper classification.
+\begin{figure}
 \centering
 \textbf{Visual Representation of Raw Features}\par\medskip
     \subcaptionbox{Recorded hat sample}{    \includegraphics[width=1\columnwidth]{images/ff1.pdf}
@@ -357,8 +360,10 @@ Figure ~\ref{stackspectrums} contains the graphed representation of features ext
     \subcaptionbox{Randomly generated audio with percussive qualities, resembling a tight snare}{\includegraphics[width=1\columnwidth]{images/ff2.pdf}}
     \subcaptionbox{A randomly generated noise with a percussive envelop but non-percussive frequency features (modulated pitch)}
     { \includegraphics[width=1\columnwidth]{images/ff3.pdf}}
-\label{stackspectrums}
+\caption{Graphed representation of features extracted for 3 different samples. }
+\label{fig:stackspectrums}
 \end{figure}
+
 % \begin{enumerate}
 % \item Envelope Transformation: Represents changes in loudness for the duration of the signal. Using STFT we generate a matrix $M_{i \times j}$ with rows $i$ and columns $j$ corresponding to time steps and frequency bins respectively. Values $v_{i \times j}$ indicating the magnitude of the frequency bin $j$ at each time-step $i$. Information about the envelope of the signal can be extracted by summing the values of $M$ for each time-step (or row $i$), giving us a feature vector that is normalized to the range of 0 to 1. The information contained in this vector is an alternative to Root-Mean-Square measurements of a sliding window over the signal.
 % \item Frequency Transformation: A static, normalized snap-shot of the the frequencies present within the audio. The calculation of this feature vector is similar to the envelope, but the summation is done along the frequency axis. Another important distinction is that since capturing an adequate frequency resolution is important for this transformation, we utilized shorter hop-sizes and wider windows. A Mel Scale transformation was also applied in hopes that the captured features better represent human perception of frequencies. 
@@ -417,33 +422,52 @@ Using our encoding and envelope features to represent audio, five classification
 \label{db:memDB}
 \end{table}
 
+
 \begin{figure}[htb!]
-    \begin{center}
+\begin{center}
     \textbf{Cross Validation F-Scores For All Sound Groups}\par\medskip
-    \makebox[\textwidth]{\includegraphics[width=0.8\paperwidth]{images/mme_comparisons_mme.pdf}}
-    \caption{Boxplots visualizing the F-Score results for each cross-validation. The individual scores, means, medians, standard-deviation and outliers are depicted. The differences are noticeable, yet means lie within the \%88-92 range. Envelope features improve classification accuracy for all models. }
+    \makebox[\textwidth]{\includegraphics[width=0.7\paperwidth]{images/mme_comparisons_mme.pdf}}
+    \caption{Boxplots visualizing the F-Score results for each cross-validation. The individual scores, means, medians, standard-deviation and outliers are depicted. Envelope features improve classification accuracy. }
     \label{fig:f1_allg_box}
-    \end{center}
+\end{center}
+
+\begin{center}
+        \textbf{Cross Validation F-Scores For Drum Vs Not-Drum}
+    \makebox[\textwidth]{\includegraphics[width=0.7\paperwidth]{images/mme_comparisons_dvn.pdf}}
+    \caption{F-Score results for each cross-validation. Models perform better as there are less categorization groups.  }
+    \label{fig:f1_dvn_box}
+\end{center}
+
+\label{fig:conf_f1_dvn}
 \end{figure}
 
-We're also interested in how these models perform on the binary drum vs not drum task.
-After grouping all drums together, we repeat the model selection process above. We also repeat the hyper-parameter optimization step where no changes appeared necessary except for a reduction in the number of neighbors for the K-Neighbor model (from 30 to 5). As show in in Figures~\ref{fig:f1_allg_box} and~\ref{fig:f1_dvn_box}, the addition of envelope features had a positive effect on performance for all mdoels, yet the RandomForest and ExtraTrees models clearly outperform the other classifiers in both tasks. We train the top two models on \%80 of our database and use the remaining \%20 to create the confusion matrices and the F-Scores shown in Figures~\ref{fig:conf_f1_dvn}.
-\begin{figure}[h!]   
-    \begin{center}
-        \textbf{Cross Validation F-Scores For Drum Vs Not-Drum}
-    \makebox[\textwidth]{\includegraphics[width=0.8\paperwidth]{images/mme_comparisons_dvn.pdf}}
-    \caption{F-Score results for each cross-validation. Models perform better as there are less categorization groups. Envelope features increase accuracy for all models. Random Forest and Extra Trees remain the top two models. }
-    \label{fig:f1_dvn_box}
-    \end{center}
-\end{figure}
+% \begin{figure}[h!]
+%     \begin{center}
+%     \textbf{Cross Validation F-Scores For All Sound Groups}\par\medskip
+%     \makebox[\textwidth]{\includegraphics[width=0.8\paperwidth]{images/mme_comparisons_mme.pdf}}
+%     \caption{Boxplots visualizing the F-Score results for each cross-validation. The individual scores, means, medians, standard-deviation and outliers are depicted. The differences are noticeable, yet means lie within the \%88-92 range. Envelope features improve classification accuracy for all models. }
+%     \label{fig:f1_allg_box}
+%     \end{center}
+% \end{figure}
+% \begin{figure}[h!]   
+%     \begin{center}
+%         \textbf{Cross Validation F-Scores For Drum Vs Not-Drum}
+%     \makebox[\textwidth]{\includegraphics[width=0.8\paperwidth]{images/mme_comparisons_dvn.pdf}}
+%     \caption{F-Score results for each cross-validation. Models perform better as there are less categorization groups. Envelope features increase accuracy for all models. Random Forest and Extra Trees remain the top two models. }
+%     \label{fig:f1_dvn_box}
+%     \end{center}
+% \end{figure}
+% We're also interested in how these models perform on the binary drum vs not drum task.
+% After grouping all drums together, we repeat the model selection process above. We also repeat the hyper-parameter optimization step where no changes appeared necessary except for a reduction in the number of neighbors for the K-Neighbor model (from 30 to 5). As show in in Figures~\ref{fig:f1_allg_box} and~\ref{fig:f1_dvn_box}, the addition of envelope features had a positive effect on performance for all mdoels, yet the RandomForest and ExtraTrees models clearly outperform the other classifiers in both tasks. We train the top two models on \%80 of our database and use the remaining \%20 to create the confusion matrices and the F-Scores shown in Figures~\ref{fig:conf_f1_dvn}.
+
 
 
 \begin{figure}[htb!]
 \begin{center}
     \textbf{ Classification Report for DvDvN and DvN  }\par\medskip
     \makebox[\textwidth]{
-    \subfloat[Precision, recall, F1-Score, and number of supporting examples]{ \includegraphics[width=9cm,height=9cm]{images/f1_mme.pdf}
-    \includegraphics[width=9cm,height=9cm]{images/f1_dvn.pdf}
+    \subfloat[Precision, recall, F1-Score, and number of supporting examples]{ \includegraphics[width=7cm,height=7cm]{images/f1_mme.pdf}
+    \includegraphics[width=7cm,height=7cm]{images/f1_dvn.pdf}
     }
     
     }
@@ -452,17 +476,15 @@ After grouping all drums together, we repeat the model selection process above. 
 
 \begin{center}
     \makebox[\textwidth]{
-    \subfloat[Confusion matrices]{ \includegraphics[width=9cm,height=9cm]{images/conf_mme.pdf}
-    \includegraphics[width=9cm,height=9cm]{images/conf_dvn.pdf}
+    \subfloat[Confusion matrices]{ \includegraphics[width=7cm,height=7cm]{images/conf_mme.pdf}
+    \includegraphics[width=7cm,height=7cm]{images/conf_dvn.pdf}
     }}
 \end{center}
-
-
-\caption{F-Scores and confusion matrix of ExtraTrees model for both DvDvN and drum vs not-drum categorization.}
+\caption{F-Scores and confusion matrix of ExtraTrees model for both DvDvN and DvN.}
 \label{fig:conf_f1_dvn}
 \end{figure}
 
-Based on these reports, having multiple options for drum categorization does not noticeably influence our models accuracy in categorizing synthetic noise as synthetic noise. However, the DvDvN models's slightly smaller false negative rate for synthetic noise (11 vs 13 false negatives) is countered by a slightly higher rate of categorizing drums as synthetic noise (12 vs 9).  We therefore use the DvDvN implementation as it simultaneously categorizes drum types and separates noise from drums. However, without manual inspection, we cannot confirm the extent of this model's usefulness. 
+% Based on these reports, having multiple options for drum categorization does not noticeably influence our models accuracy in categorizing synthetic noise as synthetic noise. However, the DvDvN models's slightly smaller false negative rate for synthetic noise (11 vs 13 false negatives) is countered by a slightly higher rate of categorizing drums as synthetic noise (12 vs 9).  We therefore use the DvDvN implementation as it simultaneously categorizes drum types and separates noise from drums. However, without manual inspection, we cannot confirm the extent of this model's usefulness. 
 %==============
 \chapter{AutoEncoder Structures and Hyper-Parameter Optimization}
 \label{appendix:hyperparam}
@@ -471,7 +493,26 @@ Within the context of machine learning, a model's \emph{hyper-parameters} are fi
 
 The list of possible choices for the selected hyper-parameters can be found in table~\ref{table:hyper_params}. We included not only model parameters but also spectrogram transformation parameters within this search space, as GPU accelerated FFT calculations allows ad hoc audio transformations to take place parallel to the training process. We implemented 3 base models which are affected by these hyper-parameters. The \enquote{Model Type} parameter dictates whether CNN or fully connected models are selected; If a \enquote{fully connected} model is selected, the \enquote{hidden layers} parameter selects between the two implementations. The specifications for these models can be found in tables~\ref{table:FC1_AUTOENCODER},~\ref{table:FC2_AUTOENCODER} and~\ref{table:CNNAUTOENCODER}.
 
-Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 search trials. The trial's success is measured in their final loss value, calculated by applying the model to test data-set. Each trials consisted of 20 epoch of training using a selected set of hyper-parameters. An additional 100 trials with 40 epochs of training were conducted following the initial 500 to test the effect of longer epochs. Each trial's intermediate results (loss at every n epoch,s where $0<n<20$) were reported to a multi-armed bandit based pruner for early stoppage of unpromising trials~\cite{li2017hyperband}. We employed a tree-structured parzen estimator for better navigation of the search space~\cite{bergstra2011algorithms,akiba2019optuna} but found short reversions to a random sampling coupled with a decrease in the frequency of pruning helpful in exiting local minima. \\
+Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 search trials. The trial's success is measured in their final loss value, calculated by applying the model to test data-set. Each trial consisted of 20 epochs of training.
+
+\begin{table}[b!]
+\centering
+\begin{tabular}{|p{6cm}|p{6cm}|}
+\hline
+Hyper-Param. & Value  \\ \hline
+Model Type      &  CNN  \\ \hline
+Optimizer       & Adam  \\ \hline
+Hidden Layers   & Not Applicable  \\\hline
+Learning Rate   &  0.001145\\ \hline
+Frequency Bins & 30 \\ \hline
+Time Steps & 20 \\ \hline
+Latent Size & 64 \\ \hline
+Regularization & 3.25^{-6}\\ \hline
+Dropout Rate & 0.5 \\ \hline
+\end{tabular}
+\caption{Top performing hyper-parameter set}
+\label{table:best_params}
+\end{table}
 \begin{table}[htb]
 \begin{tabular}{|p{28mm}|p{50mm}|p{21mm}|p{21mm}|}
 \hline
@@ -547,15 +588,15 @@ Linear-6  & [-1, 600 ] &  77,400 &Decoder's output\\ \hline
 \label{table:FC2_AUTOENCODER}
 \end{table}
 
-\begin{figure}[htb]
-\centering
-\textbf{Tracing the Best Loss Values}
-\includegraphics[width=12cm,height=7cm]{images/Optimization_History.pdf}
-\caption{Best loss values found during hyper-parameter optimization. The effect of a switch to random sampling and an increase of the pruning threshold can be observed during trials 270 and 310.}
-\label{chap3:bestvalues}
-\end{figure}
+% \begin{figure}[htb]
+% \centering
+% \textbf{Tracing the Best Loss Values}
+% \includegraphics[width=12cm,height=7cm]{images/Optimization_History.pdf}
+% \caption{Best loss values found during hyper-parameter optimization. The effect of a switch to random sampling and an increase of the pruning threshold can be observed during trials 270 and 310.}
+% \label{chap3:bestvalues}
+% \end{figure}
 
-\begin{figure}
+\begin{figure}[tb]
 \begin{center}
     \textbf{Hyper-Parameters' Loss Correlation}
     \makebox[\textwidth]{\includegraphics[width=0.95\paperwidth]{images/slice_plot.pdf}}
@@ -564,24 +605,7 @@ Linear-6  & [-1, 600 ] &  77,400 &Decoder's output\\ \hline
     \end{center}
 \end{figure}
 
-\begin{table}[htb!]
-\centering
-\begin{tabular}{|p{6cm}|p{6cm}|}
-\hline
-Hyper-Param. & Value  \\ \hline
-Model Type      &  CNN  \\ \hline
-Optimizer       & Adam  \\ \hline
-Hidden Layers   & Not Applicable  \\\hline
-Learning Rate   &  0.001145\\ \hline
-Frequency Bins & 30 \\ \hline
-Time Steps & 20 \\ \hline
-Latent Size & 64 \\ \hline
-Regularization & 3.25^{-6}\\ \hline
-Dropout Rate & 0.5 \\ \hline
-\end{tabular}
-\caption{Top performing hyper-parameter set}
-\label{table:best_params}
-\end{table}
+
 
 
 %==============

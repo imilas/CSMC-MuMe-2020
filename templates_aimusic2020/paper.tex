@@ -93,7 +93,7 @@ To facilitate future research, we share our curated dataset of free percussive s
 
 \section{Introduction} 
 Digital recordings of novel, one-shot\footnote{A single hit on the drum that captures its capabilities} drum sounds are commonly used in  electronic music compositions. Yet unique drum sounds can be difficult or expensive to find. By relying on recordings of material drum sounds, artists are limited by what instruments exist in the material world and whether or not high-quality, one-shot recordings can be accessed. We believe automatic programming of virtual synthesizers for the creation of novel drum sounds can alleviate these limitations. To this end, we implement a programmable virtual synthesizer of audio, which we call the \emph{virtual synthesizer}. We also implement machine learning classifiers for automatic separation of percussive sounds from non-percussive sounds. To effectively train the classifiers with small datasets, we simplify the representation of audio data by experimenting with fast Fourier transforms (FFT) and autoencoder embeddings. We call our system of feature extraction and classification of sounds the \emph{virtual ear}. To create a dataset of synthetic drums, the virtual synthesizer produces random programs and generates the corresponding audio. This audio is then categorized by the virtual ear. We save not just the desirable sounds, but also the programs which generated these sounds, which can be modified and experimented on by sound designers. In this work, only random search is used for program generation, but other heuristics can be integrated for an improved search algorithm in future works. We build generative systems using different implementations of the virtual ear, and conduct manual, blinded hearing tests of the generated sounds. Our results are promising as the majority of sounds generated from our systems are deemed percussive by human listeners. However, we cannot quantify the novelty of these sounds. 
- \begin{figure}[tbp]
+ \begin{figure}[tb]
     \begin{center}
     % \textbf{Generative System}
     \makebox[\textwidth]{
@@ -103,7 +103,8 @@ Digital recordings of novel, one-shot\footnote{A single hit on the drum that cap
     }
 \label{fig:pipeline_outline}
 \end{figure}
-\begin{table}[tbp]
+
+\begin{table}[tb]
 \centering
 \caption{Curated databases}
 \begin{tabular}{ |c|c| } 
@@ -117,6 +118,7 @@ MixedDB & Kicks:533 - Snares:372 - Claps:230 - Hats:105 - Others:281            
     % \caption{Overview of our datasets.}
     \label{table:drumdb}
 \end{table}
+
 % \section{Datasets}
 
 Furthermore, we provide a subset of our curated datasets to facilitate future research. We curated 3 datasets of one-shot drums which we use to train and validate drum classifiers. The number of samples per group in these databases is provided in Table ~\ref{table:drumdb}. We provide unrestricted access to \textbf{FreeDB} via Zenodo\footnote{\url{https://zenodo.org/record/3994999}}.
@@ -127,7 +129,7 @@ Furthermore, we provide a subset of our curated datasets to facilitate future re
 Numerous deep neural network models have been proposed for the purpose of signal generation in recent years~\cite{nsynth2017,yamamoto2020parallel,oord2017parallel,yee2018automatic,ramires2020neural}. WaveGans and WaveNet have been subject to significant improvements and experiments since their proposal~\cite{nsynth2017,yamamoto2020parallel,oord2017parallel}. Particularly relevant works are the utilization of variational autoencoders (VAE's) for generation of percussive samples~\cite{aouameur2019neural} and generation of percussive sounds by decoding a small set of latent features~\cite{ramires2020neural}. Automatic programming~\footnote{unsupervised generation of source code or programs towards a goal} of virtual synthesizers has long been a topic of interest. Genetic Algorithms (GA's) have long been utilized for the generation of new sounds with various sound-engines~\cite{hornermachinetongues,macret2012automatic}. A more recent work by Yee-King et al.~\cite{yee2018automatic} used Long short-Term Memory (LSTM) models and heuristic search to find the exact parameters used to create a group of sounds. The sounds approximated were made by the same virtual synthesizer and not with an external source. Esling et al. used  over 10,000 VST synthesizer presets to learn a parameter space which can be sampled for creation of new audio~\cite{esling2019universal}. Here, we work towards the approximation of percussive sounds with no prior knowledge about the parameter space of a synthesizer.
 
 \section{Virtual Synthesizer Design}
-\begin{table}[tbp]
+\begin{table}[tb]
 \centering
 \caption{Synthesizer submodule parameters. $10^{15}$ unique programs are possible. Each synthesizer can contain any number of submodules}
 \resizebox{\columnwidth}{!}{\begin{tabular}{ |p{4cm}|p{4cm}|p{4cm}| } 
@@ -153,7 +155,7 @@ Filter Order & 4,8,16 & butterworth filter order \\
 \label{table:submodule_params}
 \end{table}
 To create sounds, we build digital synthesizers. We use classical DSP to build our synthesizer, which allows for quick, offline, and parallel generation of audio signals without the usage of GPUs. We made extensive use of Pippi\footnote{https://github.com/luvsound/pippi} and SciPy~\cite{jones2001scipy} libraries. Our virtual synthesizer contains a set of one or more submodules. Each submodule is a self-contained noise making unit and creates signals by taking the steps depicted in figure~\ref{fig:submodule}. Submodules have identical sets of parameters, but widely different outputs can be achieved depending on the values assigned. The set of required parameters for each submodule is highlighted in Table~\ref{table:submodule_params}. The sonic output of the virtual synthesizer is the normalized addition of the output of its submodules. Our implementation of a synthesizer can have any number of submodules. We call the number of submodules in each virtual synthesizer the \textit{stack size}. We call the sets of parameter values that characterize a synthesizer's submodules a \textit{program} (analogous to presets and submodules for a VST).  
- \begin{figure}[tbp]
+ \begin{figure}[tb]
     \begin{center}
     % \textbf{Synthesizer SubModule }
     \makebox[\textwidth]{
@@ -184,7 +186,7 @@ The virtual ear receives sounds and discards those which do not resemble drums. 
 \text{Decision.2 If it does sound like a drum, what type of drum should it be?}
 \end{quote}
  }
- \begin{figure}[tbp]
+ \begin{figure}[tb]
     \begin{center}
     \makebox[\textwidth]{\includegraphics[width=0.95\linewidth]{images/venn_data.pdf}}
     \end{center}
@@ -204,9 +206,10 @@ In order to classify sounds, we need to summarize them as features. Various work
 
 Another set of features were extracted using the latent embeddings of autoencoder networks. Here, an autoencoder is a combination of an encoder which encodes spectrograms into a lower dimension and a decoder which tries to decode these embeddings into the original data. We trained a number of autoencoders with spectrogram transformations, and used the encoder from the autoencoder network with the lowest decoding loss as a feature extractor~\footnote{Appendix~\ref{appendix:hyperparam} has further details on the hyperparameter search process}. Latent embeddings at the bottleneck layer of our best spectrogram autoencoder are used as features for sound categorization. 
 
+% \textcolor{red}{ As a sanity check for this approach, we trained our best autoencoder using 80\% of the drums in MixedDB. Latent encodings of the remaining 20\% and 1000 Noise sounds were projected onto a 2 or 3-dimensional planes using t-SNE. We implemented interactions for our projection graphs (see Appendix~\ref{appendix:tsne}) so the sounds associated with plot points can be listened to. Hearing tests revealed a noticeable, positive correlation between a synthetic sound's distance and similarity to drum clusters.}
 
 % Please add the following required packages to your document preamble:
-\begin{table}[tbp]
+\begin{table}[tb]
 \caption{Overview of model architectures. Further details in Appendix~\ref{appendix:classifier_definitions}}
 \resizebox{\textwidth}{!}{%
     \begin{tabular}{|>{\centering\arraybackslash}p{2cm}|>{\centering\arraybackslash}p{10cm}|>{\centering\arraybackslash}p{2cm}|}
@@ -226,7 +229,7 @@ To automatically learn from the extracted features, two groups of synthetic ears
 
 MEMs learn from autoencoder embeddings and envelope features and give simultaneous answers to both decisions. We use kicks, snares, claps, and hat sounds from RadarDB and FreeDB as well as 1000 examples of synthesized noise to train MEMs. Using 10-fold cross validation, our best MEM (an ExtraTrees Classifier) achieves the average f1-score of 92\% in 5-way sound classification (4 drum categories + synthesized noise). Detailed measurements and model descriptions for TPEs and MEMs can be found in Appendix~\ref{appendix:classifier_definitions}. 
 
-\begin{figure}[tbp]
+\begin{figure}[tb]
 \begin{center}
 % \textbf{Visual Representation of FFT Features}\par\medskip
     \includegraphics[width=0.99\columnwidth]{templates_aimusic2020/images/ff3.pdf}
@@ -247,7 +250,7 @@ Both authors categorized a subset of the results without knowledge of the assign
 The percentage of sounds labeled as \enquote{bad} by the authors is a measurement of success with regards to \decfirst. We measure success with regards to \decsecond---the reliability of agreement between persons and drum categorization models---via the Fleiss' kappa coefficient \cite{fleiss1971measuring}. The value of 0 or less for this coefficient indicates no agreement beyond random chance, and the values of 1 indicates perfect agreement. We re-measure this coefficient after dropping all \enquote{bad} and \enquote{other} samples. 
 
 The majority of sounds created by our system are deemed percussive by both surveyors. 30\% of the outputs from the TPE system and 50\% of the MEM system outputs are deemed as non-percussive by at least one person. This leaves much room for improvement with regards to~\decfirst. Our performance with regards to \decsecond~is promising as we achieve moderately high agree-ability scores after dropping \enquote{bad sounds} and \enquote{other}. Despite the drawbacks, the MEM pipeline remains competitive while working with a fraction of the features to learn from and simultaneously making both decisions. Extended survey analysis is provided in Appendix~\ref{appendix:surveys}. Appendix~\ref{appendix:datasets} provides access to generated sounds.
-\begin{table}[tbp]
+\begin{table}[tb]
 \centering
 \caption{Fleiss’ kappa coefficients as a measurement of agreement between persons (H+H) and persons with models.  }
 \begin{tabular}{|c|c|c|c|c|c|c|c|}
@@ -280,23 +283,23 @@ Manual listening tests revealed much room for improvement, particularly with acc
 FreeDB, survey data, and randomly generated sounds can be downloaded from: \url{https://zenodo.org/record/3994999}\\
 RadarDB requires lengthy downloads and processing. The script for its automated creation can be found under the \enquote{getting\_data} directory of our project code: \footnote{\url{https://github.com/imilas/Synths_Stacks_Search}}
 \subsection{Details}
-Our data sources are a large set of 2 second or shorter drum samples aggregated from personal libraries, free drum kits from the sample-swap project \footnote{https://sampleswap.org/} which we organized into 5 groups, and a large set of drum sounds aggregated from royalty free sources such as music radar \footnote{https://www.musicradar.com/}. We put together 3 databases of drums using these sources. We also created a database of synthetic noise from 1, 3, and 5 stacked virtual synthesizers. Specifications about our datasets can be found in tables~\ref{db:self},~\ref{db:radar},~\ref{db:sampleswap} and~\ref{db:noise}. We have made our dataset of free-drum sounds available for download. The scripts used to download and process royalty free samples are also made available. 
+Our data sources are a large set of 2 second or shorter drum samples aggregated from personal libraries, free drum kits from the sample-swap project \footnote{https://sampleswap.org/} which we organized into 5 groups, and a large set of drum sounds aggregated from royalty free sources such as music radar \footnote{https://www.musicradar.com/}. We put together 3 databases of drums using these sources. We also created a database of synthetic noise from 1, 3, and 5 stacked virtual synthesizers. Specifications about our datasets can be found in tables~\ref{table:all_db}. We have made our dataset of free-drum sounds available for download. The scripts used to download and process royalty free samples are also made available. 
 
 We prioritize making generalizable tools which can learn from and produce a variety of different sounds. We utilize these databases depending on the task at hand. At times, we merged or purged drum groups to simplify tasks.
 
-\begin{table}[tbp]
-% \captionof{table}{Table Title} 
+\begin{table}[tb]
 \centering
+\caption{Curated databases, including NoiseDB}
 \begin{tabular}{ |c|c| } 
 \hline
 DB Name & Categories                                                        \\ \hline
 FreeDB  & Kicks:533 - Snares:372 - Claps:230 - Hats:105 - Other:281            \\ \hline
 RadarDB & \makecell{Kicks:1054 - Snares:842 - Claps:353 \\ Toms:349 - Hats:1561 - Rims:131 - Shakers:121} \\ \hline
 MixedDB & Kicks:533 - Snares:372 - Claps:230 - Hats:105 - Others:281                     \\ \hline
-NoiseDB & Generatable      & 1 Stack:2000 3 Stacks:2000  5 Stacks:2000                         \\ \hline
+NoiseDB & 1 Stack:2000 - 3 Stacks:2000 - 5 Stacks:2000                         \\ \hline
 \end{tabular}
     % \caption{Overview of our datasets.}
-    \label{table:datasets_overview}
+    \label{table:all_db}
 \end{table}
 % \begin{table}[]
 % \centering
@@ -345,7 +348,8 @@ NoiseDB & Generatable      & 1 Stack:2000 3 Stacks:2000  5 Stacks:2000          
 %==========================
 \chapter{Audio Transformation Functions}
 \label{appendix:trans_funcitons}
-\begin{figure}[tbp]
+Figure ~\ref{stackspectrums} contains the graphed representation of features extracted for 3 different samples. Sample $a$ is a recorded hat from our database. sample $b$ is an example of randomly generated noise with percussive qualities that we found suitably similar to a snare sound. Sample $c$ is an example of a randomly generated noise where the spectrum features are necessary for proper classification.
+\begin{figure}[h]
 \centering
 \textbf{Visual Representation of Raw Features}\par\medskip
     \subcaptionbox{Recorded hat sample}{    \includegraphics[width=1\columnwidth]{images/ff1.pdf}
@@ -353,14 +357,13 @@ NoiseDB & Generatable      & 1 Stack:2000 3 Stacks:2000  5 Stacks:2000          
     \subcaptionbox{Randomly generated audio with percussive qualities, resembling a tight snare}{\includegraphics[width=1\columnwidth]{images/ff2.pdf}}
     \subcaptionbox{A randomly generated noise with a percussive envelop but non-percussive frequency features (modulated pitch)}
     { \includegraphics[width=1\columnwidth]{images/ff3.pdf}}
-\caption{Graphed representation of features extracted for 3 different samples. Sample $a$ is a recorded hat from our database. sample $b$ is an example of randomly generated noise with percussive qualities that we found suitably similar to a snare sound. Sample $c$ is an example of a randomly generated noise where the spectrum features are necessary for proper classification.}
-\label{fig:stackspectrums}
+\label{stackspectrums}
 \end{figure}
-\begin{enumerate}
-\item Envelope Transformation: Represents changes in loudness for the duration of the signal. Using STFT we generate a matrix $M_{i \times j}$ with rows $i$ and columns $j$ corresponding to time steps and frequency bins respectively. Values $v_{i \times j}$ indicating the magnitude of the frequency bin $j$ at each time-step $i$. Information about the envelope of the signal can be extracted by summing the values of $M$ for each time-step (or row $i$), giving us a feature vector that is normalized to the range of 0 to 1. The information contained in this vector is an alternative to Root-Mean-Square measurements of a sliding window over the signal.
-\item Frequency Transformation: A static, normalized snap-shot of the the frequencies present within the audio. The calculation of this feature vector is similar to the envelope, but the summation is done along the frequency axis. Another important distinction is that since capturing an adequate frequency resolution is important for this transformation, we utilized shorter hop-sizes and wider windows. A Mel Scale transformation was also applied in hopes that the captured features better represent human perception of frequencies. 
-\item Spectrum Transformation: This function is simply a Mel Scaled STFT with its values normalized from 0-1. Spectrograms contain more information about the original signal but their analysis requires more complex computational methods.
-\end{enumerate}
+% \begin{enumerate}
+% \item Envelope Transformation: Represents changes in loudness for the duration of the signal. Using STFT we generate a matrix $M_{i \times j}$ with rows $i$ and columns $j$ corresponding to time steps and frequency bins respectively. Values $v_{i \times j}$ indicating the magnitude of the frequency bin $j$ at each time-step $i$. Information about the envelope of the signal can be extracted by summing the values of $M$ for each time-step (or row $i$), giving us a feature vector that is normalized to the range of 0 to 1. The information contained in this vector is an alternative to Root-Mean-Square measurements of a sliding window over the signal.
+% \item Frequency Transformation: A static, normalized snap-shot of the the frequencies present within the audio. The calculation of this feature vector is similar to the envelope, but the summation is done along the frequency axis. Another important distinction is that since capturing an adequate frequency resolution is important for this transformation, we utilized shorter hop-sizes and wider windows. A Mel Scale transformation was also applied in hopes that the captured features better represent human perception of frequencies. 
+% \item Spectrum Transformation: This function is simply a Mel Scaled STFT with its values normalized from 0-1. Spectrograms contain more information about the original signal but their analysis requires more complex computational methods.
+% \end{enumerate}
 
 %================
 \chapter{Virtual Ear Classifier Definitions}
@@ -403,7 +406,7 @@ Using our encoding and envelope features to represent audio, five classification
     \label{table:mem_model_selection}
     \end{threeparttable}
 \end{table}
-\begin{table}[htbp]
+\begin{table}[htb]
 \centering
 \begin{tabular}{|l|l|l|l|l|l|}
 \hline
@@ -414,7 +417,7 @@ Using our encoding and envelope features to represent audio, five classification
 \label{db:memDB}
 \end{table}
 
-\begin{figure}[htbp!]
+\begin{figure}[htb!]
     \begin{center}
     \textbf{Cross Validation F-Scores For All Sound Groups}\par\medskip
     \makebox[\textwidth]{\includegraphics[width=0.8\paperwidth]{images/mme_comparisons_mme.pdf}}
@@ -435,7 +438,7 @@ After grouping all drums together, we repeat the model selection process above. 
 \end{figure}
 
 
-\begin{figure}[htbp!]
+\begin{figure}[htb!]
 \begin{center}
     \textbf{ Classification Report for DvDvN and DvN  }\par\medskip
     \makebox[\textwidth]{
@@ -469,7 +472,7 @@ Within the context of machine learning, a model's \emph{hyper-parameters} are fi
 The list of possible choices for the selected hyper-parameters can be found in table~\ref{table:hyper_params}. We included not only model parameters but also spectrogram transformation parameters within this search space, as GPU accelerated FFT calculations allows ad hoc audio transformations to take place parallel to the training process. We implemented 3 base models which are affected by these hyper-parameters. The \enquote{Model Type} parameter dictates whether CNN or fully connected models are selected; If a \enquote{fully connected} model is selected, the \enquote{hidden layers} parameter selects between the two implementations. The specifications for these models can be found in tables~\ref{table:FC1_AUTOENCODER},~\ref{table:FC2_AUTOENCODER} and~\ref{table:CNNAUTOENCODER}.
 
 Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 search trials. The trial's success is measured in their final loss value, calculated by applying the model to test data-set. Each trials consisted of 20 epoch of training using a selected set of hyper-parameters. An additional 100 trials with 40 epochs of training were conducted following the initial 500 to test the effect of longer epochs. Each trial's intermediate results (loss at every n epoch,s where $0<n<20$) were reported to a multi-armed bandit based pruner for early stoppage of unpromising trials~\cite{li2017hyperband}. We employed a tree-structured parzen estimator for better navigation of the search space~\cite{bergstra2011algorithms,akiba2019optuna} but found short reversions to a random sampling coupled with a decrease in the frequency of pruning helpful in exiting local minima. \\
-\begin{table}[htbp]
+\begin{table}[htb]
 \begin{tabular}{|p{28mm}|p{50mm}|p{21mm}|p{21mm}|}
 \hline
 Hyper-Param. & Description  & Values & Distribution\\ \hline
@@ -544,7 +547,7 @@ Linear-6  & [-1, 600 ] &  77,400 &Decoder's output\\ \hline
 \label{table:FC2_AUTOENCODER}
 \end{table}
 
-\begin{figure}[htbp]
+\begin{figure}[htb]
 \centering
 \textbf{Tracing the Best Loss Values}
 \includegraphics[width=12cm,height=7cm]{images/Optimization_History.pdf}
@@ -561,7 +564,7 @@ Linear-6  & [-1, 600 ] &  77,400 &Decoder's output\\ \hline
     \end{center}
 \end{figure}
 
-\begin{table}[htbp!]
+\begin{table}[htb!]
 \centering
 \begin{tabular}{|p{6cm}|p{6cm}|}
 \hline
@@ -582,34 +585,35 @@ Dropout Rate & 0.5 \\ \hline
 
 
 %==============
-\chapter{Embedded Feature Visualization}
-Live demos provided in project source code.
-\label{appendix:tsne}
-\begin{figure}[]
-\centering
-\textbf{2 Dimensional Projection of Latent Variables}\par\medskip
- \includegraphics[width=0.90\linewidth]{images/t-SNE_2d.pdf}
-\caption{Projection of an embedding model's low dimensional encoding on to a 2D plane. We implemented interactions for these graphs for manual inspection of samples. }
-\label{fig:2d_tsne}
-\end{figure}
+% \chapter{Embedded Feature Visualization}
+% Live demos provided in project source code.
+% \label{appendix:tsne}
+% \begin{figure}[]
+% \centering
+% \textbf{2 Dimensional Projection of Latent Variables}\par\medskip
+%  \includegraphics[width=0.90\linewidth]{images/t-SNE_2d.pdf}
+% \caption{Projection of an embedding model's low dimensional encoding on to a 2D plane. We implemented interactions for these graphs for manual inspection of samples. }
+% \label{fig:2d_tsne}
+% \end{figure}
 
-\begin{figure}[]
-\centering
-\textbf{3D t-SNE Projection}\par\medskip
-\mbox{\subfloat[]{\label{subfig:1} \fbox{\includegraphics[width=12cm,height=6.8cm]{images/3d_t-SNE_symdrum_type_cam0.pdf}}}}
+% \begin{figure}[]
+% \centering
+% \textbf{3D t-SNE Projection}\par\medskip
+% \mbox{\subfloat[]{\label{subfig:1} \fbox{\includegraphics[width=12cm,height=6.8cm]{images/3d_t-SNE_symdrum_type_cam0.pdf}}}}
 
-\mbox{\subfloat[]{\label{subfig:2} \fbox{\includegraphics[width=12cm,height=6.8cm]{images/3d_t-SNE_symdrum_type_cam3.pdf}}}}
+% \mbox{\subfloat[]{\label{subfig:2} \fbox{\includegraphics[width=12cm,height=6.8cm]{images/3d_t-SNE_symdrum_type_cam3.pdf}}}}
 
-\fbox{\mbox{\subfloat[]{\label{subfig:2} \includegraphics[width=6cm,height=6cm]{images/3d_t-SNE_symdrum_type_cam1.pdf}}}
-\mbox{\subfloat[]{\label{subfig:2} \includegraphics[width=6cm,height=6cm]{images/3d_t-SNE_symdrum_type_cam2.pdf}}}}
-\caption{3D projections of the data used for Figure~\ref{fig:2d_tsne}. Interactive demos are also implemented for 3D projections.}
-\label{fig:3d_tsne}
-\end{figure}
+% \fbox{\mbox{\subfloat[]{\label{subfig:2} \includegraphics[width=6cm,height=6cm]{images/3d_t-SNE_symdrum_type_cam1.pdf}}}
+% \mbox{\subfloat[]{\label{subfig:2} \includegraphics[width=6cm,height=6cm]{images/3d_t-SNE_symdrum_type_cam2.pdf}}}}
+% \caption{3D projections of the data used for Figure~\ref{fig:2d_tsne}. Interactive demos are also implemented for 3D projections.}
+% \label{fig:3d_tsne}
+% \end{figure}
 
 
-%==============
+% %==============
 \chapter{Survey Details}
 \label{appendix:surveys}
+Details of survey responses are presented in figures~\ref{fig:freq-survey-2p} and~\ref{fig:freq-survey-mme}. The surveys were done blinded with the two authors assigning categories to unlabled sounds.
 % \begin{table}[h!]
 %   \begin{tabular}{|c | c | c | c | c | c | c|} 
 %   \hline
@@ -642,8 +646,6 @@ Live demos provided in project source code.
 % \end{tabular}
 % \caption{\label{kappa_table_MEM}Table of Fleiss' kappa coefficient to measure the degree of agreement between persons (H+H) and persons with MEM (H+MEM).}
 % \end{table}
-
-
 \begin{figure}[h!]
     \begin{center}
     \textbf{Category Assignment Frequency For TPE Survey}
@@ -654,18 +656,14 @@ Live demos provided in project source code.
 \label{fig:freq-survey-2p}
 \end{figure}
 
-\subsubsection{MEM Survey of 300 Samples:}
-
-\begin{figure}[htpb]
+\begin{figure}[h!]
     \begin{center}
     \textbf{Category Assignment Frequency For MEM Survey}
     \makebox[\textwidth]{
     \includegraphics[width=1.1\linewidth]{images/cat_MME.pdf}}
     \end{center}
     \caption{Frequency of assigned labels by persons vs the true number of labels}
-\label{fig:freq-survey-2p}
+\label{fig:freq-survey-mme}
 \end{figure} 
-
-
 \end{appendices}
 \end{document}

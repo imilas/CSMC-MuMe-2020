@@ -101,7 +101,7 @@ To facilitate future research, we share our curated dataset of free percussive s
 
 
 \section{Introduction} 
-Digital recordings of novel, one-shot\footnote{A single hit on the drum that captures its capabilities} drum sounds are commonly used in  electronic music compositions. Yet unique drum sounds can be difficult or expensive to find. By relying on recordings of material drum sounds, artists are limited by what instruments exist in the material world and whether or not high-quality, one-shot recordings can be accessed. We believe automatic programming of virtual synthesizers for the creation of novel drum sounds can alleviate these limitations. To this end, we implement a programmable virtual synthesizer of audio, which we call the \emph{virtual synthesizer}. We also implement machine learning classifiers for automatic separation of percussive sounds from non-percussive sounds. To effectively train the classifiers with small datasets, we simplify the representation of audio data by experimenting with fast Fourier transforms (FFT) and autoencoder embeddings. We call our system of feature extraction and classification of sounds the \emph{virtual ear}. To create a dataset of synthetic drums, the virtual synthesizer produces random programs and generates the corresponding audio. This audio is then categorized by the virtual ear. We save not just the desirable sounds, but also the programs which generated these sounds. These programs can be modified and experimented on by sound designers. In this work, only random search is used for program generation, but other heuristics can be integrated for an improved search algorithm in future works. We build generative systems using different implementations of the virtual ear, and conduct manual hearing tests of the generated sounds. Our results are promising as the majority of sounds generated from our systems are deemed percussive by human listeners. However, we cannot quantify the novelty of these sounds. 
+Digital recordings of novel, one-shot\footnote{A single hit on the drum that captures its capabilities} drum sounds are commonly used in  electronic music compositions. Yet unique drum sounds can be difficult or expensive to find. By relying on recordings of material drum sounds, artists are limited by what instruments exist in the material world and whether or not high-quality, one-shot recordings can be accessed. We believe automatic programming of virtual synthesizers for the creation of novel drum sounds can alleviate these limitations. To this end, we implement a programmable virtual synthesizer of audio, which we call the \emph{virtual synthesizer}. We also implement machine learning classifiers for automatic separation of percussive sounds from non-percussive sounds. To effectively train the classifiers with small datasets, we simplify the representation of audio data by experimenting with fast Fourier transforms (FFT) and autoencoder embeddings. We call our system of feature extraction and classification of sounds the \emph{virtual ear}. To create a dataset of synthetic drums, the virtual synthesizer produces random programs and generates the corresponding audio. This audio is then categorized by the virtual ear. We save not just the desirable sounds, but also the programs which generated these sounds, which can be modified and experimented on by sound designers. In this work, only random search is used for program generation, but other heuristics can be integrated for an improved search algorithm in future works. We build generative systems using different implementations of the virtual ear, and conduct manual, blinded hearing tests of the generated sounds. Our results are promising as the majority of sounds generated from our systems are deemed percussive by human listeners. However, we cannot quantify the novelty of these sounds. 
  \begin{figure}[t!]
     \begin{center}
     % \textbf{Generative System}
@@ -120,7 +120,7 @@ Digital recordings of novel, one-shot\footnote{A single hit on the drum that cap
 DB Name & Categories                                                        \\ \hline
 FreeDB  & Kicks:533 - Snares:372 - Claps:230 - Hats:105 - Other:281            \\ \hline
 RadarDB & \makecell{Kicks:1054 - Snares:842 - Claps:353 \\ Toms:349 - Hats:1561 - Rims:131 - Shakers:121} \\ \hline
-MixedDB & Kicks:533 - Snares : 372 - Claps : 230 - Hats : 105 - Others : 281                     \\ \hline
+MixedDB & Kicks:533 - Snares:372 - Claps:230 - Hats:105 - Others:281                     \\ \hline
 % NoiseDB & Generatable      & 1 Stack:2000 3 Stacks:2000  5 Stacks:2000                         \\ \hline
 \end{tabular}
     % \caption{Overview of our datasets.}
@@ -211,19 +211,19 @@ In order to classify sounds, we need to summarize them as features. Various work
 \item Spectrum Transformation: Mel Scaled STFT with values normalized from 0-1. 
 \end{enumerate}
 
-Another set of features were extracted using the latent embeddings of autoencoder networks. We trained a number of autoencoders for the task of encoding and decoding spectrogram transformation of drum sounds, and used decoding loss to measure their performance (see Appendix~\ref{appendix:hyperparam}). Latent embeddings at the bottleneck layer of our best spectrogram autoencoder are used as features for sound categorization. \textcolor{red}{ As a sanity check for this approach, we trained our best autoencoder using 80\% of the drums in MixedDB. Latent encodings of the remaining 20\% and 1000 Noise sounds were projected onto a 2 or 3-dimensional planes using t-SNE. We implemented interactions for our projection graphs (see Appendix~\ref{appendix:tsne}) so the sounds associated with plot points can be listened to. Hearing tests revealed a noticeable, positive correlation between a synthetic sound's distance and similarity to drum clusters.}
+Another set of features were extracted using the latent embeddings of autoencoder networks. Here, an autoencoder is a combination of an encoder which encodes spectrograms into a lower dimension and a decoder which tries to decode these embeddings into the original data. We trained a number of autoencoders with spectrogram transformations, and used the encoder from the autoencoder network with the lowest decoding loss as a feature extractor~\footnote{Appendix~\ref{appendix:hyperparam} has further details on the hyperparameter search process}. Latent embeddings at the bottleneck layer of our best spectrogram autoencoder are used as features for sound categorization. \textcolor{red}{ As a sanity check for this approach, we trained our best autoencoder using 80\% of the drums in MixedDB. Latent encodings of the remaining 20\% and 1000 Noise sounds were projected onto a 2 or 3-dimensional planes using t-SNE. We implemented interactions for our projection graphs (see Appendix~\ref{appendix:tsne}) so the sounds associated with plot points can be listened to. Hearing tests revealed a noticeable, positive correlation between a synthetic sound's distance and similarity to drum clusters.}
 
 % Please add the following required packages to your document preamble:
 \begin{table}[]
 \caption{Overview of model architectures. Further details in Appendix~\ref{appendix:classifier_definitions}}
 \resizebox{\textwidth}{!}{%
-    \begin{tabular}{|>{\centering\arraybackslash}p{1cm}|>{\centering\arraybackslash}p{10cm}|>{\centering\arraybackslash}p{2cm}|}
+    \begin{tabular}{|>{\centering\arraybackslash}p{2cm}|>{\centering\arraybackslash}p{10cm}|>{\centering\arraybackslash}p{2cm}|}
     \hline
     Model & Architecture Layout                                                                             & Features                 \\ \hline
-    CNN   & CNN(2 channel convolution) -\textgreater LSTM(800 hidden states) -\textgreater Linear (shape 400x5)                                 & Spectrogram          \\ \hline
-    FC    & Fully connected Linear layers with shape: 400x10x5x10x5                                & Spectrogram          \\ \hline
-    E+F   & Fully connected network of size ix10x2x5 & Env. + Freq. \\ \hline
-    MEM   & Encoder -\textgreater Trees Classifier                                              & Spectrogram          \\ \hline
+    CNN(TPE)   & CNN(2 channel convolution)~ -\textgreater~LSTM(800 hidden states)~-\textgreater\newline ~Linear Layers (shape 400x5)                                 & Spectrogram          \\ \hline
+    FC(TPE)    & Fully connected Linear layers with shape: 400x10x5x10x5                                & Spectrogram          \\ \hline
+    E+F(TPE)   & Fully connected network of size 50x10x2x5 & Env. + Freq. \\ \hline
+    MEM   & Encoder -\textgreater~Embedded Spectrogram(size 64) -\textgreater~Extra-Trees                                              & Spectrogram          \\ \hline
     \end{tabular}
 }
 \end{table}
@@ -261,7 +261,7 @@ The majority of sounds created by our system are deemed percussive by both surve
 \begin{tabular}{|c|c|c|c|c|c|c|c|}
 \hline
 System's Ear Type  & Drop Rule         & Size & HvH  & H+FC & H+CNN & H+E/F & H+MEM \\ \hline
-\ultirow{2}{*}{TPE} & No Drops          & 257  & 0.37 & 0.35 & 0.36  & 0.36  &       \\ \cline{2-8} 
+\ultirow{TPE} & No Drops          & 257  & 0.37 & 0.35 & 0.36  & 0.36  &       \\ \cline{2-8} 
                      & All Bad and Other   & 154  & 0.47 & 0.59 & 0.54  & 0.50  &       \\ \hline
 \multirow{2}{*}{MEM} & No Drops          & 300  & 0.34 &      &       &       & 0.25  \\ \cline{2-8} 
                      & All Bad and Other & 120  & 0.62 &      &       &       & 0.59  \\ \hline

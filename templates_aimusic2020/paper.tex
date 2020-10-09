@@ -68,22 +68,13 @@
 \title{Make Your Own Audience: Virtual Listeners Can Filter Generated Drum Programs}
 
 
-% a short form should be given in case it is too long for the running head
+
 \titlerunning{Make Your Audience}
-
-% the name(s) of the author(s) follow(s) next
 \author{Amir Salimi \and Abram Hindle}
-
 \authorrunning{Amir Salimi and Abram Hindle }
-
-% the affiliations are given next; don't give your e-mail address
-% unless you accept that it will be published
 \institute{Department of Computing Science\\ University of Alberta \\ \email{asalimi@ualberta.ca\\hindle1@ualberta.ca}}
 
-% intro, 1 page
-% background and methodology 2 pages
-% implementation 
-% results 2.5
+
 \maketitle
 
 \begin{abstract}
@@ -102,7 +93,7 @@ To facilitate future research, we share our curated dataset of free percussive s
 
 \section{Introduction} 
 Digital recordings of novel, one-shot\footnote{A single hit on the drum that captures its capabilities} drum sounds are commonly used in  electronic music compositions. Yet unique drum sounds can be difficult or expensive to find. By relying on recordings of material drum sounds, artists are limited by what instruments exist in the material world and whether or not high-quality, one-shot recordings can be accessed. We believe automatic programming of virtual synthesizers for the creation of novel drum sounds can alleviate these limitations. To this end, we implement a programmable virtual synthesizer of audio, which we call the \emph{virtual synthesizer}. We also implement machine learning classifiers for automatic separation of percussive sounds from non-percussive sounds. To effectively train the classifiers with small datasets, we simplify the representation of audio data by experimenting with fast Fourier transforms (FFT) and autoencoder embeddings. We call our system of feature extraction and classification of sounds the \emph{virtual ear}. To create a dataset of synthetic drums, the virtual synthesizer produces random programs and generates the corresponding audio. This audio is then categorized by the virtual ear. We save not just the desirable sounds, but also the programs which generated these sounds, which can be modified and experimented on by sound designers. In this work, only random search is used for program generation, but other heuristics can be integrated for an improved search algorithm in future works. We build generative systems using different implementations of the virtual ear, and conduct manual, blinded hearing tests of the generated sounds. Our results are promising as the majority of sounds generated from our systems are deemed percussive by human listeners. However, we cannot quantify the novelty of these sounds. 
- \begin{figure}[t!]
+ \begin{figure}[tbp]
     \begin{center}
     % \textbf{Generative System}
     \makebox[\textwidth]{
@@ -112,9 +103,9 @@ Digital recordings of novel, one-shot\footnote{A single hit on the drum that cap
     }
 \label{fig:pipeline_outline}
 \end{figure}
-\begin{table}[b]
-% \captionof{table}{Table Title} 
+\begin{table}[tbp]
 \centering
+\caption{Curated databases}
 \begin{tabular}{ |c|c| } 
 \hline
 DB Name & Categories                                                        \\ \hline
@@ -124,19 +115,19 @@ MixedDB & Kicks:533 - Snares:372 - Claps:230 - Hats:105 - Others:281            
 % NoiseDB & Generatable      & 1 Stack:2000 3 Stacks:2000  5 Stacks:2000                         \\ \hline
 \end{tabular}
     % \caption{Overview of our datasets.}
-    \label{table:datasets_overview}
+    \label{table:drumdb}
 \end{table}
 % \section{Datasets}
 
-Furthermore, we provide a subset of our curated datasets to facilitate future research. We curated 3 datasets of one-shot drums which we use to train and validate drum classifiers. We provide unrestricted access to \textbf{FreeDB} via Zenodo\footnote{\url{https://zenodo.org/record/3994999}}.
+Furthermore, we provide a subset of our curated datasets to facilitate future research. We curated 3 datasets of one-shot drums which we use to train and validate drum classifiers. The number of samples per group in these databases is provided in Table ~\ref{table:drumdb}. We provide unrestricted access to \textbf{FreeDB} via Zenodo\footnote{\url{https://zenodo.org/record/3994999}}.
 \textbf{RadarDB} cannot be shared directly, we provide the script for its automated creation\footnote{\url{https://github.com/imilas/Synths_Stacks_Search}}. We cannot provide a copy of \textbf{MixedDB}, which is curated from various sources and personal libraries. 
  % \section{Datasets}
 % We curated 3 data-sets of one-shot drums which we use to train drum classifiers. \textbf{FreeDB} contains 5 categories: kicks, snares, claps, hats and other (various percussions). \textbf{RadarDB} contains 7 categories: kicks, snares, claps, hats, shakers, toms and rims. \textbf{MixedDB} contains 8 categories: kicks, snares, claps, high toms, low toms, medium toms, closed hats and open hats. See Appendix~\ref{appendix:datasets} for details and download links.   
 \section{Related Works}
-Numerous deep neural network models have been proposed for the purpose of signal generation in recent years~\cite{nsynth2017,yamamoto2020parallel,oord2017parallel,yee2018automatic,ramires2020neural}. WaveGans and WaveNet have been subject to significant improvements and experiments since their proposal~\cite{nsynth2017,yamamoto2020parallel,oord2017parallel}. Particularly relevant works are the utilization of variational autoencoders (VAE's) for generation of percussive samples~\cite{aouameur2019neural} and generation of percussive sounds by decoding a small set of latent features~\cite{ramires2020neural}. Automatic programming~\footnote{unsupervised generation of source code or programs towards a goal} of virtual synthesizers has long been a topic of interest. In early 2000s, Interactive Genetic Algorithms (IGA's) were utilized for the generation of new sounds with various sound-engines~\cite{johnson1999exploring,dahlstedt2001creating}. A more recent work by Yee-King et al.~\cite{yee2018automatic} used Long short-Term Memory (LSTM) models and heuristic search to find the exact parameters used to create a group of sounds. The sounds approximated were made by the same virtual synthesizer and not with an external source. Esling et al. used  over 10,000 VST synthesizer presets to learn a parameter space which can be sampled for creation of new audio~\cite{esling2019universal}. Here, we work towards the approximation of percussive sounds with no prior knowledge about the parameter space of a synthesizer.
+Numerous deep neural network models have been proposed for the purpose of signal generation in recent years~\cite{nsynth2017,yamamoto2020parallel,oord2017parallel,yee2018automatic,ramires2020neural}. WaveGans and WaveNet have been subject to significant improvements and experiments since their proposal~\cite{nsynth2017,yamamoto2020parallel,oord2017parallel}. Particularly relevant works are the utilization of variational autoencoders (VAE's) for generation of percussive samples~\cite{aouameur2019neural} and generation of percussive sounds by decoding a small set of latent features~\cite{ramires2020neural}. Automatic programming~\footnote{unsupervised generation of source code or programs towards a goal} of virtual synthesizers has long been a topic of interest. Genetic Algorithms (GA's) have long been utilized for the generation of new sounds with various sound-engines~\cite{hornermachinetongues,macret2012automatic}. A more recent work by Yee-King et al.~\cite{yee2018automatic} used Long short-Term Memory (LSTM) models and heuristic search to find the exact parameters used to create a group of sounds. The sounds approximated were made by the same virtual synthesizer and not with an external source. Esling et al. used  over 10,000 VST synthesizer presets to learn a parameter space which can be sampled for creation of new audio~\cite{esling2019universal}. Here, we work towards the approximation of percussive sounds with no prior knowledge about the parameter space of a synthesizer.
 
 \section{Virtual Synthesizer Design}
-\begin{table}[th]
+\begin{table}[tbp]
 \centering
 \caption{Synthesizer submodule parameters. $10^{15}$ unique programs are possible. Each synthesizer can contain any number of submodules}
 \resizebox{\columnwidth}{!}{\begin{tabular}{ |p{4cm}|p{4cm}|p{4cm}| } 
@@ -193,7 +184,7 @@ The virtual ear receives sounds and discards those which do not resemble drums. 
 \text{Decision.2 If it does sound like a drum, what type of drum should it be?}
 \end{quote}
  }
- \begin{figure}[]
+ \begin{figure}[tbp]
     \begin{center}
     \makebox[\textwidth]{\includegraphics[width=0.95\linewidth]{images/venn_data.pdf}}
     \end{center}
@@ -204,17 +195,18 @@ The virtual ear receives sounds and discards those which do not resemble drums. 
 \decfirst~requires knowledge of what drums \textbf{do not} sound like, or knowledge of an infinitely large set, which cannot be fully represented via examples. An important consideration is that the source of sounds used for training the model (organic drum sounds) will be fundamentally different from the source of unlabeled sounds we wish to categorize (noise from a synthesizer). This issue is reflective of the open set recognition (OSR) problem~\cite{geng2020recent,mundt2019open}. We use Figure~\ref{fig:ven_data} to highlight a number of caveats with our training approach. If the sound is deemed percussive, the virtual ear makes \decsecond~by finding the best drum category for the sound. The number of categories available is dependent on the database of drums used for training. 
 To maximize the transference of knowledge gained from training the classifiers to evaluation of programs, we need to extract concise feature sets that capture fundamental characteristics of the data points.\\
 
-In order to classify sounds, we need to summarize them as features. Various works have demonstrated effective reconstruction of signals given their Short-time Fourier Transforms (STFT)~\cite{nawab1983signal,griffin1984signal}. If the STFT of a signal can be used for its reconstruction, perhaps it can be utilized as a source of fundamental features. We defined 3 STFT (or FFT) transformation functions which we believe to capture important, unique attributes of percussive sounds. 
+In order to classify sounds, we need to summarize them as features. Various works have demonstrated effective reconstruction of signals given their Short-time Fourier Transforms (STFT)~\cite{nawab1983signal,griffin1984signal}. If the STFT of a signal can be used for its reconstruction, perhaps it can be utilized as a source of fundamental features~\cite{lee2009unsupervised,hershey2017cnn}. We defined 3 STFT (or FFT) transformation functions which we believe to capture important, unique attributes of percussive sounds. 
 \begin{enumerate}
 \item Envelope Transformation: Represents changes in loudness for the duration of the signal. Using STFT we generate a matrix $M_{i \times j}$ with rows $i$ and columns $j$ corresponding to time steps and frequency bins. Values $v_{i \times j}$ indicate the magnitude of frequency bin $j$ at each time-step $i$. We approximate the envelope of the signal by summing the values of $M$ at each time-step. 
 \item Frequency Transformation:  Similar to envelope calculation, but the summation is done along the frequency axis. Shorter hop-sizes and wider windows were used to increase frequency resolution. 
 \item Spectrum Transformation: Mel Scaled STFT with values normalized from 0-1. 
 \end{enumerate}
 
-Another set of features were extracted using the latent embeddings of autoencoder networks. Here, an autoencoder is a combination of an encoder which encodes spectrograms into a lower dimension and a decoder which tries to decode these embeddings into the original data. We trained a number of autoencoders with spectrogram transformations, and used the encoder from the autoencoder network with the lowest decoding loss as a feature extractor~\footnote{Appendix~\ref{appendix:hyperparam} has further details on the hyperparameter search process}. Latent embeddings at the bottleneck layer of our best spectrogram autoencoder are used as features for sound categorization. \textcolor{red}{ As a sanity check for this approach, we trained our best autoencoder using 80\% of the drums in MixedDB. Latent encodings of the remaining 20\% and 1000 Noise sounds were projected onto a 2 or 3-dimensional planes using t-SNE. We implemented interactions for our projection graphs (see Appendix~\ref{appendix:tsne}) so the sounds associated with plot points can be listened to. Hearing tests revealed a noticeable, positive correlation between a synthetic sound's distance and similarity to drum clusters.}
+Another set of features were extracted using the latent embeddings of autoencoder networks. Here, an autoencoder is a combination of an encoder which encodes spectrograms into a lower dimension and a decoder which tries to decode these embeddings into the original data. We trained a number of autoencoders with spectrogram transformations, and used the encoder from the autoencoder network with the lowest decoding loss as a feature extractor~\footnote{Appendix~\ref{appendix:hyperparam} has further details on the hyperparameter search process}. Latent embeddings at the bottleneck layer of our best spectrogram autoencoder are used as features for sound categorization. 
+
 
 % Please add the following required packages to your document preamble:
-\begin{table}[]
+\begin{table}[tbp]
 \caption{Overview of model architectures. Further details in Appendix~\ref{appendix:classifier_definitions}}
 \resizebox{\textwidth}{!}{%
     \begin{tabular}{|>{\centering\arraybackslash}p{2cm}|>{\centering\arraybackslash}p{10cm}|>{\centering\arraybackslash}p{2cm}|}
@@ -232,7 +224,7 @@ To automatically learn from the extracted features, two groups of synthetic ears
 
 % To automatically learn from the described features, two groups of synthetic ears are implemented: \emph{two phased ears} (TPEs) and \emph{Mixed Ear Models} (MEMs).  We train multiple neural network architectures using different subsets of the FFT features to specialize in \decfirst~or \decsecond~. Our design of TPE ears allows a combination of these networks to make sequential decisions. To train TPEs for \decfirst, we use all drums in RadarDB and FreeDB (categories do not matter). To learn \enquote{not-drums}, TPEs are given 6000 examples of synthesized noise. For \decsecond, we combine the two databases and merge toms into kicks and rims/shakers into \enquote{other}. We designed and trained a number of neural net architectures with 80\% of this dataset. Using the remaining 20\% of sounds, we achieved 98\% accuracy in \decfirst~and 82\% accuracy in~\decsecond. Our best models both utilize convolutional neural net (CNN) layers that learn from spectrogram data. These accuracy numbers are weak as we did not account for category sizes or cross validate.
 
-MEMs learn from autoencoder embeddings and envelope features and give simultaneous answers to both decisions. We use kicks, snares, claps, and hat sounds from RadarDB and FreeDB as well as 1000 examples of synthesized noise to train MEMs. Using 10-fold cross validation, our best MEM (an ExtraTrees Classifier) achieves the average f1-score of 92\% in 5-way sound classification (4 drum categories + synthesized noise). \textcolor{red}{  This MEM makes both decisions together. Although never used, we achieved an average f1-score of 99\% after grouping drums together. } Detailed measurements and model descriptions for TPEs and MEMs can be found in Appendix~\ref{appendix:classifier_definitions}. 
+MEMs learn from autoencoder embeddings and envelope features and give simultaneous answers to both decisions. We use kicks, snares, claps, and hat sounds from RadarDB and FreeDB as well as 1000 examples of synthesized noise to train MEMs. Using 10-fold cross validation, our best MEM (an ExtraTrees Classifier) achieves the average f1-score of 92\% in 5-way sound classification (4 drum categories + synthesized noise). Detailed measurements and model descriptions for TPEs and MEMs can be found in Appendix~\ref{appendix:classifier_definitions}. 
 
 \begin{figure}[tbp]
 \begin{center}
@@ -278,7 +270,7 @@ Manual listening tests revealed much room for improvement, particularly with acc
 
 
 \bibliographystyle{apacite}
-\bibliography{CSMC_MUME_LaTeX_Template.bib}
+\bibliography{citations.bib}
 
 \begin{appendices}
 %======================
@@ -291,49 +283,65 @@ RadarDB requires lengthy downloads and processing. The script for its automated 
 Our data sources are a large set of 2 second or shorter drum samples aggregated from personal libraries, free drum kits from the sample-swap project \footnote{https://sampleswap.org/} which we organized into 5 groups, and a large set of drum sounds aggregated from royalty free sources such as music radar \footnote{https://www.musicradar.com/}. We put together 3 databases of drums using these sources. We also created a database of synthetic noise from 1, 3, and 5 stacked virtual synthesizers. Specifications about our datasets can be found in tables~\ref{db:self},~\ref{db:radar},~\ref{db:sampleswap} and~\ref{db:noise}. We have made our dataset of free-drum sounds available for download. The scripts used to download and process royalty free samples are also made available. 
 
 We prioritize making generalizable tools which can learn from and produce a variety of different sounds. We utilize these databases depending on the task at hand. At times, we merged or purged drum groups to simplify tasks.
-\begin{table}[]
-\centering
-\begin{tabular}[width=\paperwidth]{|l|l|l|l|l|l|l|l|l|l|}
-\hline
-DB Name & kick & snare & clap & tom\_high & tom\_mid & tom\_low & hihat\_closed &  hihat\_open & rim \\ \hline
-MixedDB & 648 & 732 & 118 & 179 & 139 &  188 & 187 & 280 & 105 \\\hline
-\end{tabular}
-\caption{Database 1: Mixed sources}
-\label{db:self}
-\end{table}
 
-\begin{table}[]
+\begin{table}[tbp]
+% \captionof{table}{Table Title} 
 \centering
-\begin{tabular}{|l|l|l|l|l|l|l|l|l|}
+\begin{tabular}{ |c|c| } 
 \hline
-DB Name & kick & snare & clap & tom & clap & hat & rim & shaker  \\ \hline
-RadarDB & 1054 & 842   & 353 & 349 &  353 & 1561& 131 & 121 \\ \hline
+DB Name & Categories                                                        \\ \hline
+FreeDB  & Kicks:533 - Snares:372 - Claps:230 - Hats:105 - Other:281            \\ \hline
+RadarDB & \makecell{Kicks:1054 - Snares:842 - Claps:353 \\ Toms:349 - Hats:1561 - Rims:131 - Shakers:121} \\ \hline
+MixedDB & Kicks:533 - Snares:372 - Claps:230 - Hats:105 - Others:281                     \\ \hline
+NoiseDB & Generatable      & 1 Stack:2000 3 Stacks:2000  5 Stacks:2000                         \\ \hline
 \end{tabular}
-\caption{Database 2: Royalty free sounds sourced from \enquote{Music Radar}}
-\label{db:radar}
+    % \caption{Overview of our datasets.}
+    \label{table:datasets_overview}
 \end{table}
+% \begin{table}[]
+% \centering
+% \begin{tabular}[width=\paperwidth]{|l|l|l|l|l|l|l|l|l|l|}
+% \hline
+% DB Name & kick & snare & clap & tom\_high & tom\_mid & tom\_low & hihat\_closed &  hihat\_open & rim \\ \hline
+% MixedDB & 648 & 732 & 118 & 179 & 139 &  188 & 187 & 280 & 105 \\\hline
+% \end{tabular}
+% \caption{Database 1: Mixed sources}
+% \label{db:self}
+% \end{table}
 
-\begin{table}[]
-\centering
-\begin{tabular}{|l|l|l|l|l|l|}
-\hline
- DB Name & kick & snare & clap & hat & other \\\hline
- FreeDB & 533 & 372 & 230 & 105 & 281 \\ \hline
-\end{tabular}
-\caption{Database 3: Free sounds sourced from the \enquote{Sample Swap} project. Simplified for our purposes. The version available for download contains more sample groups. The \enquote{other} category contains a variety of percussive sounds.}
-\label{db:sampleswap}
-\end{table}
+% \begin{table}[]
+% \centering
+% \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
+% \hline
+% DB Name & kick & snare & clap & tom & clap & hat & rim & shaker  \\ \hline
+% RadarDB & 1054 & 842   & 353 & 349 &  353 & 1561& 131 & 121 \\ \hline
+% \end{tabular}
+% \caption{Database 2: Royalty free sounds sourced from \enquote{Music Radar}}
+% \label{db:radar}
+% \end{table}
 
-\begin{table}[]
-\centering
-\begin{tabular}{|l|l|l|l|}
-\hline
- Synth Noise Type & 1 Stack & 3 Stacks  & 5 Stacks \\ \hline
- Number of Examples & 2000 & 2000 & 2000 \\ \hline
-\end{tabular}
-\caption{Database of random noise examples from our virtual synthesizers}
-\label{db:noise}
-\end{table}
+% \begin{table}[]
+% \centering
+% \begin{tabular}{|l|l|l|l|l|l|}
+% \hline
+%  DB Name & kick & snare & clap & hat & other \\\hline
+%  FreeDB & 533 & 372 & 230 & 105 & 281 \\ \hline
+% \end{tabular}
+% \caption{Database 3: Free sounds sourced from the \enquote{Sample Swap} project. Simplified for our purposes. The version available for download contains more sample groups. The \enquote{other} category contains a variety of percussive sounds.}
+% \label{db:sampleswap}
+% \end{table}
+
+% \begin{table}[]
+% \centering
+% \begin{tabular}{|l|l|l|l|}
+% \hline
+%  Synth Noise Type & 1 Stack & 3 Stacks  & 5 Stacks \\ \hline
+%  Number of Examples & 2000 & 2000 & 2000 \\ \hline
+% \end{tabular}
+% \caption{Database of random noise examples from our virtual synthesizers}
+% \label{db:noise}
+% \end{table}
+
 %==========================
 \chapter{Audio Transformation Functions}
 \label{appendix:trans_funcitons}
@@ -602,38 +610,38 @@ Live demos provided in project source code.
 %==============
 \chapter{Survey Details}
 \label{appendix:surveys}
-\begin{table}[h!]
-  \begin{tabular}{|c | c | c | c | c | c | c|} 
-  \hline
-  Drop Rule & Size & H+H & H+FC & H+CNN & H+E/F & 3 models \\ [0.5ex] 
-  \hline
-  No Drops & 257 &0.37 & 0.35 & 0.36 & 0.36 & 0.28\\ 
-  \hline
-  Assigned \enquote{Bad} By Both & 236 & 0.31 & 0.37 & 0.37 & 0.38 & 0.30 \\
-  \hline
-  Assigned \enquote{Bad} By Either & 180 & 0.47 & 0.50 & 0.48 & 0.48 &  0.34 \\
-  \hline
-  Assigned \enquote{Bad} or \enquote{Other} By Either & 154 & 0.47 & 0.59 & 0.54 & 0.50 &  0.35 \\
-  \hline
- \end{tabular}
- \caption{\label{kappa_table_TPE}Table of Fleiss' kappa coefficient to measure the degree of agreement between persons (H+H), persons with FC model (H+FC), persons with CNNLSTM model, persons with all models (H+E/F), and between the 3 models. } % AH: Which decision is this?
- \end{table}
-\begin{table}[h!]
- \begin{tabular}{|c| p{2cm} | p{2cm}| p{2cm}|} 
- \hline
- Drop Rule & Size & H+H & H+MEM \\
- \hline
- No Drop & 300 & 0.34 & 0.25\\ 
- \hline
- Assigned Bad By Both & 249 & 0.20 & 0.26 \\
- \hline
- Assigned Bad By Either & 151 & 0.46 &  0.47 \\
- \hline
-Assigned \enquote{Bad} or \enquote{Other} By Either  & 120 & 0.62   &  0.59 \\
- \hline
-\end{tabular}
-\caption{\label{kappa_table_MEM}Table of Fleiss' kappa coefficient to measure the degree of agreement between persons (H+H) and persons with MEM (H+MEM).}
-\end{table}
+% \begin{table}[h!]
+%   \begin{tabular}{|c | c | c | c | c | c | c|} 
+%   \hline
+%   Drop Rule & Size & H+H & H+FC & H+CNN & H+E/F & 3 models \\ [0.5ex] 
+%   \hline
+%   No Drops & 257 &0.37 & 0.35 & 0.36 & 0.36 & 0.28\\ 
+%   \hline
+%   Assigned \enquote{Bad} By Both & 236 & 0.31 & 0.37 & 0.37 & 0.38 & 0.30 \\
+%   \hline
+%   Assigned \enquote{Bad} By Either & 180 & 0.47 & 0.50 & 0.48 & 0.48 &  0.34 \\
+%   \hline
+%   Assigned \enquote{Bad} or \enquote{Other} By Either & 154 & 0.47 & 0.59 & 0.54 & 0.50 &  0.35 \\
+%   \hline
+%  \end{tabular}
+%  \caption{\label{kappa_table_TPE}Table of Fleiss' kappa coefficient to measure the degree of agreement between persons (H+H), persons with FC model (H+FC), persons with CNNLSTM model, persons with all models (H+E/F), and between the 3 models. } % AH: Which decision is this?
+%  \end{table}
+% \begin{table}[h!]
+%  \begin{tabular}{|c| p{2cm} | p{2cm}| p{2cm}|} 
+%  \hline
+%  Drop Rule & Size & H+H & H+MEM \\
+%  \hline
+%  No Drop & 300 & 0.34 & 0.25\\ 
+%  \hline
+%  Assigned Bad By Both & 249 & 0.20 & 0.26 \\
+%  \hline
+%  Assigned Bad By Either & 151 & 0.46 &  0.47 \\
+%  \hline
+% Assigned \enquote{Bad} or \enquote{Other} By Either  & 120 & 0.62   &  0.59 \\
+%  \hline
+% \end{tabular}
+% \caption{\label{kappa_table_MEM}Table of Fleiss' kappa coefficient to measure the degree of agreement between persons (H+H) and persons with MEM (H+MEM).}
+% \end{table}
 
 
 \begin{figure}[h!]

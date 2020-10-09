@@ -36,6 +36,7 @@
 \usepackage[bottom]{footmisc}
 \usepackage{makecell}
 \usepackage{xcolor}
+
 \newcommand{\keywords}[1]{\par\addvspace\baselineskip
 \noindent\keywordname\enspace\ignorespaces#1}
 
@@ -137,6 +138,7 @@ Numerous deep neural network models have been proposed for the purpose of signal
 \section{Virtual Synthesizer Design}
 \begin{table}[th]
 \centering
+\caption{Synthesizer submodule parameters. $10^{15}$ unique programs are possible. Each synthesizer can contain any number of submodules}
 \resizebox{\columnwidth}{!}{\begin{tabular}{ |p{4cm}|p{4cm}|p{4cm}| } 
 \hline
 Parameters & Value Range & notes and constraints\\
@@ -156,7 +158,7 @@ LP filter Cutoff & 20000hz-HP & never lower than HP cutoff\\
 Filter Order & 4,8,16 & butterworth filter order \\
 \hline
 \end{tabular}}
-\caption{Synthesizer submodule parameters. $10^{15}$ unique programs are possible. Each synthesizer can contain any number of submodules}
+
 \label{table:submodule_params}
 \end{table}
 To create sounds, we build digital synthesizers. We use classical DSP to build our synthesizer, which allows for quick, offline, and parallel generation of audio signals without the usage of GPUs. We made extensive use of Pippi\footnote{https://github.com/luvsound/pippi} and SciPy~\cite{jones2001scipy} libraries. Our virtual synthesizer contains a set of one or more submodules. Each submodule is a self-contained noise making unit and creates signals by taking the steps depicted in figure~\ref{fig:submodule}. Submodules have identical sets of parameters, but widely different outputs can be achieved depending on the values assigned. The set of required parameters for each submodule is highlighted in Table~\ref{table:submodule_params}. The sonic output of the virtual synthesizer is the normalized addition of the output of its submodules. Our implementation of a synthesizer can have any number of submodules. We call the number of submodules in each virtual synthesizer the \textit{stack size}. We call the sets of parameter values that characterize a synthesizer's submodules a \textit{program} (analogous to presets and submodules for a VST).  
@@ -164,7 +166,7 @@ To create sounds, we build digital synthesizers. We use classical DSP to build o
     \begin{center}
     % \textbf{Synthesizer SubModule }
     \makebox[\textwidth]{
-    \fbox{\includegraphics[width=1\linewidth]{templates_aimusic2020/images/synthesizer_block_thin.pdf}}}
+    \includegraphics[width=1\linewidth]{templates_aimusic2020/images/synthesizer_block_thin.pdf}}
     \end{center}
     \caption{High level representation of pre-rendering steps for each submodule. Each Synthesizer contains 1 or more these submodules. Synthesizer programs set the number of these submodules and their parameters. The output of a synthesizer is the normalized addition of all its submodule outputs. 
     }
@@ -211,6 +213,21 @@ In order to classify sounds, we need to summarize them as features. Various work
 
 Another set of features were extracted using the latent embeddings of autoencoder networks. We trained a number of autoencoders for the task of encoding and decoding spectrogram transformation of drum sounds, and used decoding loss to measure their performance (see Appendix~\ref{appendix:hyperparam}). Latent embeddings at the bottleneck layer of our best spectrogram autoencoder are used as features for sound categorization. \textcolor{red}{ As a sanity check for this approach, we trained our best autoencoder using 80\% of the drums in MixedDB. Latent encodings of the remaining 20\% and 1000 Noise sounds were projected onto a 2 or 3-dimensional planes using t-SNE. We implemented interactions for our projection graphs (see Appendix~\ref{appendix:tsne}) so the sounds associated with plot points can be listened to. Hearing tests revealed a noticeable, positive correlation between a synthetic sound's distance and similarity to drum clusters.}
 
+% Please add the following required packages to your document preamble:
+\begin{table}[]
+\caption{Overview of model architectures. Further details in Appendix~\ref{appendix:classifier_definitions}}
+\resizebox{\textwidth}{!}{%
+    \begin{tabular}{|>{\centering\arraybackslash}p{1cm}|>{\centering\arraybackslash}p{10cm}|>{\centering\arraybackslash}p{2cm}|}
+    \hline
+    Model & Architecture Layout                                                                             & Features                 \\ \hline
+    CNN   & CNN(2 channel convolution) -\textgreater LSTM(800 hidden states) -\textgreater Linear (shape 400x5)                                 & Spectrogram          \\ \hline
+    FC    & Fully connected Linear layers with shape: 400x10x5x10x5                                & Spectrogram          \\ \hline
+    E+F   & Fully connected network of size ix10x2x5 & Env. + Freq. \\ \hline
+    MEM   & Encoder -\textgreater Trees Classifier                                              & Spectrogram          \\ \hline
+    \end{tabular}
+}
+\end{table}
+
 To automatically learn from the extracted features, two groups of synthetic ears are implemented: \emph{two phased ears} (TPEs) and \emph{Mixed Ear Models} (MEMs).  For TPEs, we train multiple neural network architectures using different subsets of the FFT features to specialize in \decfirst~or \decsecond~ and combine them to make decisions sequentially. To train TPEs for \decfirst, we use all drums in RadarDB and FreeDB and 6000 examples of synthesized noise. For \decsecond, we combine the two databases and merge toms into kicks and rims/shakers into \enquote{other}. We trained the TPE models with 80\% of this dataset. Using the remaining 20\% of sounds, we achieved 98\% accuracy in \decfirst~and 82\% accuracy in~\decsecond~with our best models. These accuracy numbers are weak as we did not account for category sizes or cross validate.
 
 % To automatically learn from the described features, two groups of synthetic ears are implemented: \emph{two phased ears} (TPEs) and \emph{Mixed Ear Models} (MEMs).  We train multiple neural network architectures using different subsets of the FFT features to specialize in \decfirst~or \decsecond~. Our design of TPE ears allows a combination of these networks to make sequential decisions. To train TPEs for \decfirst, we use all drums in RadarDB and FreeDB (categories do not matter). To learn \enquote{not-drums}, TPEs are given 6000 examples of synthesized noise. For \decsecond, we combine the two databases and merge toms into kicks and rims/shakers into \enquote{other}. We designed and trained a number of neural net architectures with 80\% of this dataset. Using the remaining 20\% of sounds, we achieved 98\% accuracy in \decfirst~and 82\% accuracy in~\decsecond. Our best models both utilize convolutional neural net (CNN) layers that learn from spectrogram data. These accuracy numbers are weak as we did not account for category sizes or cross validate.
@@ -220,7 +237,7 @@ MEMs learn from autoencoder embeddings and envelope features and give simultaneo
 \begin{figure}[tbp]
 \begin{center}
 % \textbf{Visual Representation of FFT Features}\par\medskip
-    \makebox[\textwidth]{\includegraphics[width=0.99\columnwidth]{templates_aimusic2020/images/ff3.pdf}}
+    \includegraphics[width=0.99\columnwidth]{templates_aimusic2020/images/ff3.pdf}
 \caption{Visualized representation of FFT features for a randomly synthesized noise. More examples in Appendix~\ref{appendix:trans_funcitons}.}
 \label{fig:stackspectrums}
     \end{center}
@@ -240,16 +257,16 @@ The percentage of sounds labeled as \enquote{bad} by the authors is a measuremen
 The majority of sounds created by our system are deemed percussive by both surveyors. 30\% of the outputs from the TPE system and 50\% of the MEM system outputs are deemed as non-percussive by at least one person. This leaves much room for improvement with regards to~\decfirst. Our performance with regards to \decsecond~is promising as we achieve moderately high agree-ability scores after dropping \enquote{bad sounds} and \enquote{other}. Despite the drawbacks, the MEM pipeline remains competitive while working with a fraction of the features to learn from and simultaneously making both decisions. Extended survey analysis is provided in Appendix~\ref{appendix:surveys}. Appendix~\ref{appendix:datasets} provides access to generated sounds.
 \begin{table}[tbp]
 \centering
+\caption{Fleiss’ kappa coefficients as a measurement of agreement between persons (H+H) and persons with models.  }
 \begin{tabular}{|c|c|c|c|c|c|c|c|}
 \hline
-Ear Type / System Name & Drop Rule         & Size & HvH  & H+FC & H+CNN & H+E/F & H+MEM \\ \hline
+System's Ear Type  & Drop Rule         & Size & HvH  & H+FC & H+CNN & H+E/F & H+MEM \\ \hline
 \ultirow{2}{*}{TPE} & No Drops          & 257  & 0.37 & 0.35 & 0.36  & 0.36  &       \\ \cline{2-8} 
                      & All Bad and Other   & 154  & 0.47 & 0.59 & 0.54  & 0.50  &       \\ \hline
 \multirow{2}{*}{MEM} & No Drops          & 300  & 0.34 &      &       &       & 0.25  \\ \cline{2-8} 
                      & All Bad and Other & 120  & 0.62 &      &       &       & 0.59  \\ \hline
 \end{tabular}
 
-\caption{Fleiss’ kappa coefficients as a measurement of agreement between persons (H+H) and persons with models.  }
 \end{table}
 \section{Conclusion, Validity, and Future Work} 
 
